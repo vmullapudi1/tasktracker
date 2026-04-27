@@ -1,0 +1,30 @@
+:root {
+  --serif: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --bg: oklch(0.965 0.012 80);
+  --surface: oklch(0.95 0.011 80);
+  --surface-2: oklch(0.93 0.012 80);
+  --paper: oklch(0.985 0.008 80);
+  --rule: oklch(0.89 0.012 80);
+  --rule-strong: oklch(0.82 0.013 80);
+  --ink: oklch(0.22 0.02 60);
+  --ink-soft: oklch(0.32 0.02 60);
+  --ink-2: oklch(0.4 0.015 60);
+  --ink-3: oklch(0.55 0.012 60);
+  --accent: oklch(0.5 0.13 250);
+}
+
+[data-theme='dark'] {
+  --bg: oklch(0.18 0.01 80);
+  --surface: oklch(0.22 0.011 80);
+  --surface-2: oklch(0.26 0.012 80);
+  --paper: oklch(0.21 0.012 80);
+  --rule: oklch(0.3 0.015 80);
+  --rule-strong: oklch(0.4 0.015 80);
+  --ink: oklch(0.93 0.012 80);
+  --ink-soft: oklch(0.85 0.012 80);
+  --ink-2: oklch(0.78 0.012 80);
+  --ink-3: oklch(0.6 0.012 80);
+}
