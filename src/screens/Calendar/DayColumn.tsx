@@ -21,8 +21,10 @@ export function DayColumn({
   drag,
   setDrag,
   onBlockClick,
+  onBlockContextMenu,
   onCreateBlock,
   onDropTodo,
+  timeFormat = '12h',
 }: {
   date: Date;
   dateKey: string;
@@ -32,8 +34,10 @@ export function DayColumn({
   drag: DragState | null;
   setDrag: (drag: DragState | null) => void;
   onBlockClick: (block: Block, e: MouseEvent) => void;
+  onBlockContextMenu: (block: Block, anchor: { x: number; y: number }) => void;
   onCreateBlock: (args: { dateKey: string; startMin: number; endMin: number; clientX: number; clientY: number }) => void;
   onDropTodo: (args: { todoId: string; dateKey: string; startMin: number }) => void;
+  timeFormat?: '12h' | '24h';
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [dropHover, setDropHover] = useState<number | null>(null);
@@ -148,16 +152,23 @@ export function DayColumn({
       ))}
 
       {blocks.map((b) => (
-        <BlockEl key={b.id} block={b} projects={projects} onClick={(e) => onBlockClick(b, e)} />
+        <BlockEl
+          key={b.id}
+          block={b}
+          projects={projects}
+          onClick={(e) => onBlockClick(b, e)}
+          onContextMenu={(e) => onBlockContextMenu(b, { x: e.clientX, y: e.clientY })}
+          timeFormat={timeFormat}
+        />
       ))}
 
-      {drag && drag.dateKey === dateKey && <DragPreview drag={drag} />}
-      {dropHover != null && <DropPreview startMin={dropHover} />}
+      {drag && drag.dateKey === dateKey && <DragPreview drag={drag} timeFormat={timeFormat} />}
+      {dropHover != null && <DropPreview startMin={dropHover} timeFormat={timeFormat} />}
     </div>
   );
 }
 
-function DropPreview({ startMin }: { startMin: number }) {
+function DropPreview({ startMin, timeFormat }: { startMin: number; timeFormat?: '12h' | '24h' }) {
   const top = ((startMin - HOUR_START * 60) / 60) * HOUR_HEIGHT;
   return (
     <div
@@ -178,12 +189,12 @@ function DropPreview({ startMin }: { startMin: number }) {
         fontFamily: 'var(--mono)',
       }}
     >
-      drop to schedule at {fmtTime(startMin)}
+      drop to schedule at {fmtTime(startMin, timeFormat)}
     </div>
   );
 }
 
-function DragPreview({ drag }: { drag: DragState }) {
+function DragPreview({ drag, timeFormat }: { drag: DragState; timeFormat?: '12h' | '24h' }) {
   const s = Math.min(drag.startMin, drag.endMin);
   const e = Math.max(drag.startMin, drag.endMin);
   const top = ((s - HOUR_START * 60) / 60) * HOUR_HEIGHT;
@@ -209,7 +220,7 @@ function DragPreview({ drag }: { drag: DragState }) {
         zIndex: 4,
       }}
     >
-      {fmtTime(s)} – {fmtTime(e)}
+      {fmtTime(s, timeFormat)} – {fmtTime(e, timeFormat)}
     </div>
   );
 }

@@ -8,10 +8,14 @@ export function BlockEl({
   block,
   projects,
   onClick,
+  onContextMenu,
+  timeFormat = '12h',
 }: {
   block: Block;
   projects: Project[];
   onClick: (e: MouseEvent) => void;
+  onContextMenu?: (e: MouseEvent) => void;
+  timeFormat?: '12h' | '24h';
 }) {
   const proj = projects.find((p) => p.id === block.projectId);
   const pal = proj ? paletteFor(proj.paletteIdx) : null;
@@ -23,6 +27,13 @@ export function BlockEl({
       onClick={(e) => {
         e.stopPropagation();
         onClick(e);
+      }}
+      onContextMenu={(e) => {
+        if (onContextMenu) {
+          e.preventDefault();
+          e.stopPropagation();
+          onContextMenu(e);
+        }
       }}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
@@ -73,7 +84,7 @@ export function BlockEl({
             marginTop: 2,
           }}
         >
-          {fmtTime(block.start)}–{fmtTime(block.end)}
+          {fmtTime(block.start, timeFormat)}–{fmtTime(block.end, timeFormat)}
         </div>
       )}
     </div>
