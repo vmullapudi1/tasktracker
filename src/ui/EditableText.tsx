@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 export function EditableText({
@@ -20,9 +20,9 @@ export function EditableText({
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  useEffect(() => {
-    if (!editing) setDraft(value);
-  }, [value, editing]);
+  if (!editing && draft !== value) {
+    setDraft(value);
+  }
 
   const commit = () => {
     setEditing(false);

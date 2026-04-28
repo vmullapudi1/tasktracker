@@ -40,11 +40,12 @@ export function App() {
   const settings = useSettings(rep);
   const syncStatus = useSyncStatus(sync);
 
-  useEffect(() => {
-    if (rep && settings && !settings.hasSeenHelp) {
-      setHelpOpen(true);
-    }
-  }, [rep, settings?.hasSeenHelp]);
+  // Auto-open help for new users. We use a separate state to track if we've auto-opened it this session.
+  const [autoHelpOpened, setAutoHelpOpened] = useState(false);
+  if (rep && settings && !settings.hasSeenHelp && !autoHelpOpened && !helpOpen) {
+    setAutoHelpOpened(true);
+    setHelpOpen(true);
+  }
 
   useEffect(() => {
     const resolveTheme = () => {
@@ -68,7 +69,7 @@ export function App() {
       media.addEventListener('change', listener);
       return () => media.removeEventListener('change', listener);
     }
-  }, [settings.theme, settings.accentColor, settings.density]);
+  }, [settings.theme, settings.accentColor, settings.density, settings]);
 
   const handlePickFolder = useCallback(async () => {
     if (!sync) return;
@@ -86,7 +87,7 @@ export function App() {
     if (rep && settings && !settings.hasSeenHelp) {
       void rep.mutate.updateSettings({ hasSeenHelp: true });
     }
-  }, [rep, settings?.hasSeenHelp]);
+  }, [rep, settings]);
 
   return (
     <div

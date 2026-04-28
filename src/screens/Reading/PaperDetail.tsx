@@ -4,7 +4,7 @@ import { Btn } from '../../ui/Btn';
 import { EditableText } from '../../ui/EditableText';
 import { Field } from '../../ui/Field';
 import { Select } from '../../ui/Select';
-import { sectionTitle } from '../Projects/ProjectDetail';
+import { SECTION_TITLE_STYLE } from '../../styles/shared';
 
 export function PaperDetail({
   paper,
@@ -99,7 +99,7 @@ export function PaperDetail({
           borderLeft: '3px solid ' + (proj ? PROJECT_PALETTE[proj.paletteIdx].fg : 'var(--rule-strong)'),
         }}
       >
-        <div style={sectionTitle}>Summary</div>
+        <div style={SECTION_TITLE_STYLE}>Summary</div>
         <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6, fontFamily: 'var(--sans)' }}>
           <EditableText
             value={paper.summary}
@@ -118,7 +118,7 @@ export function PaperDetail({
           borderLeft: '3px solid var(--accent)',
         }}
       >
-        <div style={sectionTitle}>Key takeaway</div>
+        <div style={SECTION_TITLE_STYLE}>Key takeaway</div>
         <div
           style={{
             fontFamily: 'var(--serif)',

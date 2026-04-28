@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Project } from '../../data/types';
 import { paletteFor } from '../../data/palette';
 import { fmtDuration } from '../../data/helpers';
@@ -12,6 +12,12 @@ const SIZE = 220;
 const R = 86;
 const STROKE = 22;
 
+interface DonutArc extends DonutSegment {
+  frac: number;
+  offset: number;
+  length: number;
+}
+
 export function TimeDonut({
   segments,
   projects,
@@ -24,13 +30,14 @@ export function TimeDonut({
   const [hover, setHover] = useState<string | null>(null);
   const c = 2 * Math.PI * R;
 
-  let acc = 0;
-  const arcs = segments.map((s) => {
-    const frac = total > 0 ? s.minutes / total : 0;
-    const arc = { ...s, frac, offset: acc, length: frac * c };
-    acc += frac;
-    return arc;
-  });
+  const arcs = useMemo(() => {
+    return segments.reduce((accArr: DonutArc[], s) => {
+      const prev = accArr[accArr.length - 1];
+      const offset = prev ? prev.offset + prev.frac : 0;
+      const frac = total > 0 ? s.minutes / total : 0;
+      return [...accArr, { ...s, frac, offset, length: frac * c }];
+    }, []);
+  }, [segments, total, c]);
 
   const hovered = hover ? arcs.find((a) => a.projectId === hover) : null;
 

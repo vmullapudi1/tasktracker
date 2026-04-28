@@ -200,8 +200,12 @@ export class SyncController {
     if (this.subUnsub) return;
     this.subUnsub = this.rep.subscribe(
       async (tx) => {
+        const scanner = tx.scan({ prefix: KEY.pendingPrefix }).values();
         let count = 0;
-        for await (const _ of tx.scan({ prefix: KEY.pendingPrefix }).values()) count++;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of scanner) {
+          count++;
+        }
         return count;
       },
       {

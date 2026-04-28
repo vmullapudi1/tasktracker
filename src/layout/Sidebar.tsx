@@ -4,12 +4,12 @@ import type { SyncStatus } from '../sync/sync-controller';
 
 export type Tab = 'dashboard' | 'calendar' | 'projects' | 'reading' | 'kanban' | 'insights';
 
-export interface TabSpec {
+interface TabSpec {
   id: Tab;
   label: string;
 }
 
-export const TABS: TabSpec[] = [
+const TABS: TabSpec[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'calendar', label: 'Calendar' },
   { id: 'kanban', label: 'Kanban' },

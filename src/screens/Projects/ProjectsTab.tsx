@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Project } from '../../data/types';
 import { uid } from '../../data/helpers';
 import { PROJECT_PALETTE } from '../../data/palette';
@@ -11,12 +11,11 @@ export function ProjectsTab({ rep }: { rep: Rep | null }) {
   const projects = useProjects(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (selectedId && projects.find((p) => p.id === selectedId)) return;
-    setSelectedId(projects[0]?.id ?? null);
-  }, [projects, selectedId]);
+  const effectiveId = (selectedId && projects.some((p) => p.id === selectedId)) 
+    ? selectedId 
+    : (projects[0]?.id ?? null);
 
-  const selected = projects.find((p) => p.id === selectedId) ?? null;
+  const selected = projects.find((p) => p.id === effectiveId) ?? null;
 
   const update = (patch: Partial<Project>) => {
     if (!rep || !selected) return;
@@ -78,7 +77,7 @@ export function ProjectsTab({ rep }: { rep: Rep | null }) {
         minHeight: 0,
       }}
     >
-      <ProjectList projects={projects} selectedId={selectedId} onSelect={setSelectedId} onAdd={addProject} />
+      <ProjectList projects={projects} selectedId={effectiveId} onSelect={setSelectedId} onAdd={addProject} />
       {selected ? (
         <ProjectDetail key={selected.id} project={selected} onUpdate={update} onDelete={deleteSelected} />
       ) : (

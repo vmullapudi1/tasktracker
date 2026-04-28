@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import type { CSSProperties } from 'react';
 import type { Project } from '../../data/types';
 import { paletteFor } from '../../data/palette';
 import { uid, fmtDateKey } from '../../data/helpers';
@@ -9,16 +8,7 @@ import { Field } from '../../ui/Field';
 import { Input } from '../../ui/Input';
 import { Check } from '../../ui/Check';
 import { Empty } from '../../ui/Empty';
-
-export const sectionTitle: CSSProperties = {
-  fontSize: 11,
-  fontFamily: 'var(--mono)',
-  color: 'var(--ink-3)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.08em',
-  fontWeight: 600,
-  margin: '0 0 12px',
-};
+import { SECTION_TITLE_STYLE } from '../../styles/shared';
 
 function PhaseRow({
   phase,
@@ -322,7 +312,7 @@ export function ProjectDetail({
 
       {/* Specs */}
       <section style={{ marginTop: 24 }}>
-        <h3 style={sectionTitle}>Project specs</h3>
+        <h3 style={SECTION_TITLE_STYLE}>Project specs</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <Field label="Target hours">
             <Input
@@ -351,7 +341,7 @@ export function ProjectDetail({
             marginBottom: 12,
           }}
         >
-          <h3 style={{ ...sectionTitle, marginBottom: 0 }}>Phases & checkpoints</h3>
+          <h3 style={{ ...SECTION_TITLE_STYLE, marginBottom: 0 }}>Phases & checkpoints</h3>
           <Btn onClick={addPhase}>+ phase</Btn>
         </div>
 
@@ -437,7 +427,7 @@ export function ProjectDetail({
             marginBottom: 12,
           }}
         >
-          <h3 style={{ ...sectionTitle, marginBottom: 0 }}>Progress updates</h3>
+          <h3 style={{ ...SECTION_TITLE_STYLE, marginBottom: 0 }}>Progress updates</h3>
           <Btn onClick={addUpdate}>+ update</Btn>
         </div>
         {(project.updates || []).length === 0 ? (

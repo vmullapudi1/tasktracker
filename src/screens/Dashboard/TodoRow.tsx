@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { Project, Todo } from '../../data/types';
-import { fmtDateKey, formatDueShort, isOverdue, isToday } from '../../data/helpers';
+import { formatDueShort, isOverdue, isToday } from '../../data/helpers';
 import { Check } from '../../ui/Check';
 import { ProjectChip } from '../../ui/ProjectChip';
 
@@ -9,7 +9,6 @@ export function TodoRow({
   todo,
   projects,
   onUpdate,
-  onDelete: _onDelete,
   onContextMenu,
 }: {
   todo: Todo;
@@ -99,8 +98,4 @@ export function TodoRow({
       </span>
     </li>
   );
-}
-
-export function todayKey(): string {
-  return fmtDateKey(new Date());
 }

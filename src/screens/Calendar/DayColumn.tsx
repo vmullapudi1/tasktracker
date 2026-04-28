@@ -13,7 +13,6 @@ export interface DragState {
 }
 
 export function DayColumn({
-  date: _date,
   dateKey,
   dayIdx,
   blocks,

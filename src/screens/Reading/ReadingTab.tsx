@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Paper } from '../../data/types';
 import type { Rep } from '../../store/replicache';
 import { usePapers, useProjects } from '../../store/subscriptions';
@@ -16,10 +16,9 @@ export function ReadingTab({ rep }: { rep: Rep | null }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    if (selectedId && papers.find((p) => p.id === selectedId)) return;
-    setSelectedId(papers[0]?.id ?? null);
-  }, [papers, selectedId]);
+  const effectiveId = (selectedId && papers.some((p) => p.id === selectedId)) 
+    ? selectedId 
+    : (papers[0]?.id ?? null);
 
   const filtered = papers
     .filter((p) => {
@@ -29,7 +28,7 @@ export function ReadingTab({ rep }: { rep: Rep | null }) {
     })
     .sort((a, b) => (b.addedAt || '').localeCompare(a.addedAt || ''));
 
-  const selected = papers.find((p) => p.id === selectedId) ?? null;
+  const selected = papers.find((p) => p.id === effectiveId) ?? null;
 
   const updatePaper = (patch: Partial<Paper>) => {
     if (!rep || !selected) return;
@@ -137,7 +136,7 @@ export function ReadingTab({ rep }: { rep: Rep | null }) {
                     textAlign: 'left',
                     appearance: 'none',
                     border: 'none',
-                    background: selectedId === p.id ? 'var(--surface-2)' : 'transparent',
+                    background: effectiveId === p.id ? 'var(--surface-2)' : 'transparent',
                     padding: '12px',
                     borderRadius: 6,
                     cursor: 'pointer',
