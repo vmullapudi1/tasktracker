@@ -3,6 +3,7 @@ export const KEY = {
   block: (id: string) => `block/${id}`,
   paper: (id: string) => `paper/${id}`,
   todo: (id: string) => `todo/${id}`,
+  highlight: (id: string) => `highlight/${id}`,
   settings: 'settings/user',
   meta: 'meta/snapshot',
   pending: (seq: number) => `pending/${String(seq).padStart(12, '0')}`,
@@ -14,6 +15,7 @@ export const PREFIX = {
   block: 'block/',
   paper: 'paper/',
   todo: 'todo/',
+  highlight: 'highlight/',
 } as const;
 
 export interface MetaSnapshot {

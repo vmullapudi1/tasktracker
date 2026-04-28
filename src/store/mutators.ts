@@ -1,5 +1,5 @@
 import type { ReadonlyJSONValue, WriteTransaction } from 'replicache';
-import type { Block, Paper, Project, Settings, Todo, AppData } from '../data/types';
+import type { Block, Paper, Project, Settings, Todo, WeeklyHighlight, AppData } from '../data/types';
 import { DEFAULT_SETTINGS } from '../data/types';
 import { DEFAULT_META, KEY, PREFIX } from './schema';
 import type { MetaSnapshot, PendingEntry } from './schema';
@@ -89,6 +89,18 @@ export const mutators = {
     await appendPending(tx, 'deleteTodo', args);
   },
 
+  // ── Highlights ────────────────────────────────────────────────────────────
+  async setHighlight(tx: WriteTransaction, args: { id: string; patch: Partial<WeeklyHighlight> }): Promise<void> {
+    const existing = r<WeeklyHighlight>(await tx.get(KEY.highlight(args.id))) ?? {
+      id: args.id,
+      top3: '',
+      movedForward: '',
+      stalled: '',
+    };
+    await tx.set(KEY.highlight(args.id), j({ ...existing, ...args.patch }));
+    await appendPending(tx, 'setHighlight', args);
+  },
+
   // Drag-todo-onto-calendar: creates a block AND marks the todo scheduled.
   async scheduleTodo(tx: WriteTransaction, args: { todoId: string; block: Block }): Promise<void> {
     const todo = r<Todo>(await tx.get(KEY.todo(args.todoId)));
@@ -110,7 +122,7 @@ export const mutators = {
   // Wipes domain entities and writes the supplied snapshot. Does NOT touch
   // pending/* or meta/* — caller manages those.
   async importSnapshot(tx: WriteTransaction, data: AppData): Promise<void> {
-    for (const prefix of [PREFIX.project, PREFIX.block, PREFIX.paper, PREFIX.todo]) {
+    for (const prefix of [PREFIX.project, PREFIX.block, PREFIX.paper, PREFIX.todo, PREFIX.highlight]) {
       const keys: string[] = [];
       for await (const [k] of tx.scan({ prefix }).entries()) {
         keys.push(k as string);
@@ -121,6 +133,9 @@ export const mutators = {
     for (const b of data.blocks) await tx.set(KEY.block(b.id), j(b));
     for (const p of data.papers) await tx.set(KEY.paper(p.id), j(p));
     for (const t of data.todos) await tx.set(KEY.todo(t.id), j(t));
+    if (data.highlights) {
+      for (const h of data.highlights) await tx.set(KEY.highlight(h.id), j(h));
+    }
     await tx.set(KEY.settings, j(data.settings));
   },
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ReadTransaction } from 'replicache';
-import type { Block, Paper, Project, Settings, Todo } from '../data/types';
+import type { Block, Paper, Project, Settings, Todo, WeeklyHighlight } from '../data/types';
 import { DEFAULT_SETTINGS } from '../data/types';
 import { KEY, PREFIX } from './schema';
 import type { Rep } from './replicache';
@@ -40,6 +40,10 @@ export function usePapers(rep: Rep | null): Paper[] {
 
 export function useTodos(rep: Rep | null): Todo[] {
   return useSubscribe(rep, (tx) => scanAll<Todo>(tx, PREFIX.todo), []);
+}
+
+export function useHighlights(rep: Rep | null): WeeklyHighlight[] {
+  return useSubscribe(rep, (tx) => scanAll<WeeklyHighlight>(tx, PREFIX.highlight), []);
 }
 
 export function useSettings(rep: Rep | null): Settings {

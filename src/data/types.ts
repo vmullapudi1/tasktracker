@@ -60,6 +60,14 @@ export interface Todo {
   scheduled: boolean;
   tags?: string[];
   status?: 'todo' | 'doing' | 'done';
+  order?: number;
+}
+
+export interface WeeklyHighlight {
+  id: string; // monday date key: YYYY-MM-DD
+  top3: string;
+  movedForward: string;
+  stalled: string;
 }
 
 export type Density = 'compact' | 'comfortable';
@@ -96,5 +104,6 @@ export interface AppData {
   blocks: Block[];
   papers: Paper[];
   todos: Todo[];
+  highlights: WeeklyHighlight[];
   settings: Settings;
 }
