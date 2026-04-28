@@ -11,11 +11,13 @@ import { DashboardTab } from './screens/Dashboard/DashboardTab';
 import { CalendarTab } from './screens/Calendar/CalendarTab';
 import { ProjectsTab } from './screens/Projects/ProjectsTab';
 import { ReadingTab } from './screens/Reading/ReadingTab';
+import { SettingsModal } from './screens/Settings/SettingsModal';
 
 export function App() {
   const [rep, setRep] = useState<Rep | null>(null);
   const [sync, setSync] = useState<SyncController | null>(null);
   const [tab, setTab] = useState<Tab>('dashboard');
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -36,8 +38,9 @@ export function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = settings.darkMode ? 'dark' : 'light';
+    document.documentElement.dataset.density = settings.density;
     document.documentElement.style.setProperty('--accent', `oklch(0.5 0.13 ${settings.accentHue})`);
-  }, [settings.darkMode, settings.accentHue]);
+  }, [settings.darkMode, settings.accentHue, settings.density]);
 
   const handlePickFolder = useCallback(async () => {
     if (!sync) return;
@@ -65,6 +68,7 @@ export function App() {
         sync={syncStatus}
         onPickFolder={handlePickFolder}
         onFlushNow={handleFlushNow}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
       <Main tab={tab}>
         {tab === 'dashboard' && <DashboardTab rep={rep} onNav={setTab} />}
@@ -72,6 +76,7 @@ export function App() {
         {tab === 'projects' && <ProjectsTab rep={rep} />}
         {tab === 'reading' && <ReadingTab rep={rep} />}
       </Main>
+      {settingsOpen && <SettingsModal rep={rep} onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }
