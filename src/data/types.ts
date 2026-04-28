@@ -36,6 +36,7 @@ export interface Block {
   end: number;
   title: string;
   projectId: string;
+  seriesId?: string;
 }
 
 export interface Paper {
@@ -68,6 +69,10 @@ export interface Settings {
   density: Density;
   showTodayRail: boolean;
   dashboardName: string;
+  calendarStartHour: number;
+  calendarEndHour: number;
+  timeFormat: '12h' | '24h';
+  firstDayOfWeek: 'monday' | 'sunday';
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -76,6 +81,10 @@ export const DEFAULT_SETTINGS: Settings = {
   density: 'comfortable',
   showTodayRail: true,
   dashboardName: 'PhD Dashboard',
+  calendarStartHour: 7,
+  calendarEndHour: 22,
+  timeFormat: '12h',
+  firstDayOfWeek: 'monday',
 };
 
 export interface AppData {

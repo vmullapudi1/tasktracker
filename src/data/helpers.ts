@@ -1,11 +1,15 @@
 export const uid = (): string => Math.random().toString(36).slice(2, 9);
 
-export function startOfWeek(date: Date | string | number): Date {
+export function startOfWeek(date: Date | string | number, firstDay: 'monday' | 'sunday' = 'monday'): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   const day = d.getDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + mondayOffset);
+  if (firstDay === 'monday') {
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + mondayOffset);
+  } else {
+    d.setDate(d.getDate() - day);
+  }
   return d;
 }
 
@@ -27,9 +31,12 @@ export function parseDateKey(key: string): Date {
   return new Date(y, m - 1, d);
 }
 
-export function fmtTime(mins: number): string {
+export function fmtTime(mins: number, format: '12h' | '24h' = '12h'): string {
   const h = Math.floor(mins / 60);
   const m = mins % 60;
+  if (format === '24h') {
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }
   const ampm = h >= 12 ? 'pm' : 'am';
   const hh = h % 12 === 0 ? 12 : h % 12;
   return m === 0 ? `${hh}${ampm}` : `${hh}:${String(m).padStart(2, '0')}${ampm}`;
@@ -47,6 +54,16 @@ export function weekNumber(date = new Date()): number {
   const start = new Date(date.getFullYear(), 0, 1);
   const days = Math.floor((date.getTime() - start.getTime()) / 86400000);
   return Math.ceil((days + start.getDay() + 1) / 7);
+}
+
+export function addWeeks(date: Date | string | number, n: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n * 7);
+  return d;
+}
+
+export function isSameOrAfter(d1: string, d2: string): boolean {
+  return d1 >= d2;
 }
 
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
