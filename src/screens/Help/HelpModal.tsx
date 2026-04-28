@@ -17,7 +17,7 @@ const HELP_STEPS = [
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <p>The <b>Dashboard</b> is your command center. It gives you a high-level view of your current progress, upcoming deadlines, and recent activity.</p>
-        <p>Use the <b>To-do list</b> here to quickly capture and manage your immediate tasks.</p>
+        <p>Use the <b>Inbox</b> here to quickly capture and manage your immediate tasks.</p>
       </div>
     ),
   },

@@ -51,37 +51,38 @@ export function TodoRow({
       }}
       style={{
         display: 'grid',
-        gridTemplateColumns: 'auto auto 1fr auto auto',
+        gridTemplateColumns: 'auto 1fr auto auto auto',
         alignItems: 'center',
-        gap: 10,
-        padding: '8px 8px',
+        gap: 8,
+        padding: '6px 8px',
         margin: '0 -8px',
         borderRadius: 6,
         background: hover ? 'var(--surface-2)' : 'transparent',
         cursor: 'grab',
         transition: 'background .12s',
-        borderLeft: `3px solid ${priorityColor(todo.priority)}`,
+        borderLeft: `4px solid ${priorityColor(todo.priority)}`,
       }}
+      title={todo.priority ? `Priority: ${todo.priority}` : 'Normal priority'}
     >
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        {onSelect && (
-          <Check checked={!!selected} onChange={onSelect} size={14} />
-        )}
-        <Check checked={todo.done} onChange={(v) => onUpdate({ done: v })} size={15} />
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+      <Check checked={todo.done} onChange={(v) => onUpdate({ done: v })} size={15} />
+      
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
         <span
           style={{
             fontSize: 13,
             color: 'var(--ink)',
             textDecoration: todo.done ? 'line-through' : 'none',
             opacity: todo.done ? 0.5 : 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            flexShrink: 1
           }}
         >
           {todo.title}
         </span>
         {todo.tags && todo.tags.length > 0 && (
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
             {todo.tags.map((tag) => (
               <span
                 key={tag}
@@ -100,19 +101,49 @@ export function TodoRow({
           </div>
         )}
       </div>
-      {proj ? <ProjectChip project={proj} /> : <span />}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
+        {proj && <ProjectChip project={proj} />}
+      </div>
+
       <span
         style={{
           fontFamily: 'var(--mono)',
           fontSize: 11,
           color: overdue ? 'oklch(0.5 0.13 25)' : dueToday ? 'var(--accent)' : 'var(--ink-3)',
           fontWeight: overdue || dueToday ? 600 : 400,
-          minWidth: 56,
+          minWidth: 40,
           textAlign: 'right',
         }}
       >
         {todo.due ? formatDueShort(todo.due) : '—'}
       </span>
+
+      <div style={{ width: 24, display: 'flex', justifyContent: 'center' }}>
+        {onSelect && (
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(!selected);
+            }}
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              border: `1.5px solid ${selected ? 'var(--accent)' : 'var(--rule-strong)'}`,
+              background: selected ? 'var(--accent)' : 'transparent',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all .15s'
+            }}
+            title="Click to select for bulk priority"
+          >
+            {selected && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'white' }} />}
+          </div>
+        )}
+      </div>
     </li>
   );
 }

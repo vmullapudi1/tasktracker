@@ -117,14 +117,32 @@ export function TodosCard({
 
   return (
     <Card
-      title="To-do"
+      title="Inbox"
       action={
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {selectedIds.size > 0 && (
+          {selectedIds.size > 0 ? (
             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600, marginRight: 4 }}>SET PRIORITY:</span>
               <Btn size="sm" onClick={() => bulkAction({ priority: 'high' })}>High</Btn>
               <Btn size="sm" onClick={() => bulkAction({ priority: 'medium' })}>Med</Btn>
+              <Btn size="sm" onClick={() => bulkAction({ priority: 'low' })}>Low</Btn>
               <Btn size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>Clear</Btn>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--surface-2)', padding: '2px 8px', borderRadius: 4 }}>
+              <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600, marginRight: 2 }}>KEY:</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: 'oklch(0.6 0.18 20)' }} />
+                <span style={{ fontSize: 10, color: 'var(--ink-2)', fontWeight: 500 }}>High</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: 'oklch(0.75 0.15 70)' }} />
+                <span style={{ fontSize: 10, color: 'var(--ink-2)', fontWeight: 500 }}>Med</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: 'oklch(0.8 0.1 140)' }} />
+                <span style={{ fontSize: 10, color: 'var(--ink-2)', fontWeight: 500 }}>Low</span>
+              </div>
             </div>
           )}
           <span style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{visible.length} open</span>
