@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { bootstrap, getRep, getSync } from './store/bootstrap';
-import { useSettings } from './store/subscriptions';
+import { useSettings, useProjects, useTodos, usePapers } from './store/subscriptions';
 import { useSyncStatus } from './sync/useSyncStatus';
 import { pickFolder } from './sync/fsaccess';
 import type { Rep } from './store/replicache';
@@ -15,6 +15,7 @@ import { KanbanTab } from './screens/Kanban/KanbanTab';
 import { InsightsTab } from './screens/Insights/InsightsTab';
 import { SettingsModal } from './screens/Settings/SettingsModal';
 import { HelpModal } from './screens/Help/HelpModal';
+import { GlobalSearchModal } from './screens/Search/GlobalSearchModal';
 
 export function App() {
   const [rep, setRep] = useState<Rep | null>(null);
@@ -22,6 +23,9 @@ export function App() {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [navigatedProjectId, setNavigatedProjectId] = useState<string | null>(null);
+  const [navigatedPaperId, setNavigatedPaperId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -38,6 +42,9 @@ export function App() {
   }, []);
 
   const settings = useSettings(rep);
+  const projects = useProjects(rep);
+  const todos = useTodos(rep);
+  const papers = usePapers(rep);
   const syncStatus = useSyncStatus(sync);
 
   // Auto-open help for new users. We use a separate state to track if we've auto-opened it this session.
@@ -46,6 +53,17 @@ export function App() {
     setAutoHelpOpened(true);
     setHelpOpen(true);
   }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const resolveTheme = () => {
@@ -89,6 +107,12 @@ export function App() {
     }
   }, [rep, settings]);
 
+  const handleSelectResult = (t: Tab, id: string) => {
+    setTab(t);
+    if (t === 'projects') setNavigatedProjectId(id);
+    if (t === 'reading') setNavigatedPaperId(id);
+  };
+
   return (
     <div
       style={{
@@ -106,6 +130,7 @@ export function App() {
         onFlushNow={handleFlushNow}
         onOpenSettings={() => setSettingsOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
+        onOpenSearch={() => setSearchOpen(true)}
         dashboardName={settings.dashboardName}
       />
       <Main tab={tab}>
@@ -113,11 +138,31 @@ export function App() {
         {tab === 'calendar' && <CalendarTab rep={rep} />}
         {tab === 'kanban' && <KanbanTab rep={rep} />}
         {tab === 'insights' && <InsightsTab rep={rep} />}
-        {tab === 'projects' && <ProjectsTab rep={rep} />}
-        {tab === 'reading' && <ReadingTab rep={rep} />}
+        {tab === 'projects' && (
+          <ProjectsTab
+            rep={rep}
+            navigatedId={navigatedProjectId}
+            onNavigated={() => setNavigatedProjectId(null)}
+          />
+        )}
+        {tab === 'reading' && (
+          <ReadingTab
+            rep={rep}
+            navigatedId={navigatedPaperId}
+            onNavigated={() => setNavigatedPaperId(null)}
+          />
+        )}
       </Main>
       {settingsOpen && <SettingsModal rep={rep} onClose={() => setSettingsOpen(false)} />}
       {helpOpen && <HelpModal onClose={handleCloseHelp} />}
+      <GlobalSearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        projects={projects}
+        todos={todos}
+        papers={papers}
+        onSelect={handleSelectResult}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Paper } from '../../data/types';
 import type { Rep } from '../../store/replicache';
 import { usePapers, useProjects } from '../../store/subscriptions';
@@ -9,12 +9,27 @@ import { AddPaperModal } from './AddPaperModal';
 
 export type ReadingFilter = 'all' | 'unread' | 'read';
 
-export function ReadingTab({ rep }: { rep: Rep | null }) {
+export function ReadingTab({ 
+  rep, 
+  navigatedId, 
+  onNavigated 
+}: { 
+  rep: Rep | null;
+  navigatedId?: string | null;
+  onNavigated?: () => void;
+}) {
   const [filter, setFilter] = useState<ReadingFilter>('all');
   const papers = usePapers(rep);
   const projects = useProjects(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+
+  useEffect(() => {
+    if (navigatedId) {
+      setSelectedId(navigatedId);
+      onNavigated?.();
+    }
+  }, [navigatedId, onNavigated]);
 
   const effectiveId = (selectedId && papers.some((p) => p.id === selectedId)) 
     ? selectedId 

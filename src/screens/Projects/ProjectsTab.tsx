@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Project } from '../../data/types';
 import { uid } from '../../data/helpers';
 import { PROJECT_PALETTE } from '../../data/palette';
@@ -7,9 +7,24 @@ import { useProjects } from '../../store/subscriptions';
 import { ProjectList } from './ProjectList';
 import { ProjectDetail } from './ProjectDetail';
 
-export function ProjectsTab({ rep }: { rep: Rep | null }) {
+export function ProjectsTab({ 
+  rep, 
+  navigatedId, 
+  onNavigated 
+}: { 
+  rep: Rep | null;
+  navigatedId?: string | null;
+  onNavigated?: () => void;
+}) {
   const projects = useProjects(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (navigatedId) {
+      setSelectedId(navigatedId);
+      onNavigated?.();
+    }
+  }, [navigatedId, onNavigated]);
 
   const effectiveId = (selectedId && projects.some((p) => p.id === selectedId)) 
     ? selectedId 

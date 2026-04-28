@@ -26,6 +26,7 @@ export function Sidebar({
   onFlushNow,
   onOpenSettings,
   onOpenHelp,
+  onOpenSearch,
   dashboardName,
 }: {
   current: Tab;
@@ -35,6 +36,7 @@ export function Sidebar({
   onFlushNow: () => void;
   onOpenSettings: () => void;
   onOpenHelp: () => void;
+  onOpenSearch: () => void;
   dashboardName: string;
 }) {
   return (
@@ -91,6 +93,42 @@ export function Sidebar({
             week {weekNumber()}
           </div>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <button
+          onClick={onOpenSearch}
+          style={{
+            width: '100%',
+            appearance: 'none',
+            border: '1px solid var(--rule)',
+            background: 'var(--paper)',
+            borderRadius: 8,
+            padding: '8px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            color: 'var(--ink-3)',
+            fontSize: 13,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            transition: 'border-color .15s, background .15s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'var(--accent)';
+            e.currentTarget.style.background = 'var(--surface)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--rule)';
+            e.currentTarget.style.background = 'var(--paper)';
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>🔍</span>
+            Search
+          </div>
+          <div style={{ fontSize: 10, fontFamily: 'var(--mono)', opacity: 0.6 }}>⌘K</div>
+        </button>
       </div>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
