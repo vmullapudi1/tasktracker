@@ -80,19 +80,3 @@ export function App() {
     </div>
   );
 }
-
-function Stub({ label }: { label: string }) {
-  return (
-    <div
-      style={{
-        padding: '60px 20px',
-        textAlign: 'center',
-        color: 'var(--ink-3)',
-        fontStyle: 'italic',
-        fontSize: 13,
-      }}
-    >
-      {label}
-    </div>
-  );
-}

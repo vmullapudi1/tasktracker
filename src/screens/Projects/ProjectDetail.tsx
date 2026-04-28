@@ -1,4 +1,5 @@
-import { CSSProperties, useState } from 'react';
+import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { Project } from '../../data/types';
 import { paletteFor } from '../../data/palette';
 import { uid, fmtDateKey } from '../../data/helpers';
