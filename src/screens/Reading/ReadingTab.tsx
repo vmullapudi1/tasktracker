@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Fuse from 'fuse.js';
 import type { Paper } from '../../data/types';
 import type { Rep } from '../../store/replicache';
 import { usePapers, useProjects } from '../../store/subscriptions';
@@ -6,6 +7,7 @@ import { ProjectChip } from '../../ui/ProjectChip';
 import { Empty } from '../../ui/Empty';
 import { PaperDetail } from './PaperDetail';
 import { AddPaperModal } from './AddPaperModal';
+import { Input } from '../../ui/Input';
 
 export type ReadingFilter = 'all' | 'unread' | 'read';
 
@@ -19,6 +21,7 @@ export function ReadingTab({
   onNavigated?: () => void;
 }) {
   const [filter, setFilter] = useState<ReadingFilter>('all');
+  const [query, setQuery] = useState('');
   const papers = usePapers(rep);
   const projects = useProjects(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -35,13 +38,25 @@ export function ReadingTab({
     ? selectedId 
     : (papers[0]?.id ?? null);
 
-  const filtered = papers
-    .filter((p) => {
-      if (filter === 'unread') return !p.read;
-      if (filter === 'read') return p.read;
-      return true;
-    })
-    .sort((a, b) => (b.addedAt || '').localeCompare(a.addedAt || ''));
+  const fuse = useMemo(
+    () =>
+      new Fuse(papers, {
+        keys: ['title', 'authors', 'summary', 'takeaway', 'venue'],
+        threshold: 0.35,
+      }),
+    [papers],
+  );
+
+  const filtered = useMemo(() => {
+    let base = query ? fuse.search(query).map((r) => r.item) : papers;
+    return base
+      .filter((p) => {
+        if (filter === 'unread') return !p.read;
+        if (filter === 'read') return p.read;
+        return true;
+      })
+      .sort((a, b) => (b.addedAt || '').localeCompare(a.addedAt || ''));
+  }, [fuse, query, papers, filter]);
 
   const selected = papers.find((p) => p.id === effectiveId) ?? null;
 
@@ -127,6 +142,15 @@ export function ReadingTab({
           >
             + paper
           </button>
+        </div>
+
+        <div style={{ padding: '0 8px 12px' }}>
+          <Input
+            value={query}
+            onChange={setQuery}
+            placeholder="Search papers..."
+            style={{ fontSize: 13, padding: '6px 10px' }}
+          />
         </div>
 
         <ul

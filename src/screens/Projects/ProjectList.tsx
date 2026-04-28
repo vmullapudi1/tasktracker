@@ -1,5 +1,8 @@
+import { useMemo, useState } from 'react';
+import Fuse from 'fuse.js';
 import type { Project } from '../../data/types';
 import { ProjectDot } from '../../ui/ProjectDot';
+import { Input } from '../../ui/Input';
 
 export function ProjectList({
   projects,
@@ -12,6 +15,18 @@ export function ProjectList({
   onSelect: (id: string) => void;
   onAdd: () => void;
 }) {
+  const [query, setQuery] = useState('');
+
+  const fuse = useMemo(
+    () => new Fuse(projects, { keys: ['name', 'code'], threshold: 0.35 }),
+    [projects],
+  );
+
+  const filtered = useMemo(
+    () => (query ? fuse.search(query).map((r) => r.item) : projects),
+    [fuse, query, projects],
+  );
+
   return (
     <div
       style={{
@@ -22,11 +37,12 @@ export function ProjectList({
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
+        gap: 12,
       }}
     >
       <div
         style={{
-          padding: '4px 8px 12px',
+          padding: '0 4px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -59,6 +75,14 @@ export function ProjectList({
           + new
         </button>
       </div>
+
+      <Input
+        value={query}
+        onChange={setQuery}
+        placeholder="Filter projects..."
+        style={{ fontSize: 13, padding: '6px 10px' }}
+      />
+
       <ul
         style={{
           listStyle: 'none',
@@ -70,7 +94,7 @@ export function ProjectList({
           gap: 2,
         }}
       >
-        {projects.map((p) => (
+        {filtered.map((p) => (
           <li key={p.id}>
             <button
               onClick={() => onSelect(p.id)}

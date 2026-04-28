@@ -48,6 +48,15 @@ const HELP_STEPS = [
     ),
   },
   {
+    title: '🔍 Quick Search',
+    content: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <p>Never lose track of your research. Press <b>Cmd + K</b> (or <b>Ctrl + K</b>) from anywhere to open the global search modal.</p>
+        <p>You can search for projects, tasks, and even specific details within your reading summaries and takeaways. The search is <b>fuzzy</b>, so it will find results even with typos.</p>
+      </div>
+    ),
+  },
+  {
     title: '📱 Install as App',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

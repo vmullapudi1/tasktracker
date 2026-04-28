@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import Fuse from 'fuse.js';
 import type { Project, Todo } from '../../data/types';
 import { addDays, fmtDateKey, uid } from '../../data/helpers';
 import type { Rep } from '../../store/replicache';
@@ -26,11 +27,19 @@ export function TodosCard({
   const [draftDue, setDraftDue] = useState(() => fmtDateKey(addDays(new Date(), 1)));
   const [draftTags, setDraftTags] = useState('');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
+  const [query, setQuery] = useState('');
 
-  const visible = todos
-    .filter((t) => !t.done)
-    .slice()
-    .sort((a, b) => (a.due ?? '').localeCompare(b.due ?? ''));
+  const openTodos = useMemo(() => todos.filter((t) => !t.done), [todos]);
+
+  const fuse = useMemo(
+    () => new Fuse(openTodos, { keys: ['title', 'tags'], threshold: 0.35 }),
+    [openTodos],
+  );
+
+  const visible = useMemo(() => {
+    let base = query ? fuse.search(query).map((r) => r.item) : openTodos;
+    return base.slice().sort((a, b) => (a.due ?? '').localeCompare(b.due ?? ''));
+  }, [fuse, query, openTodos]);
 
   const startAdd = () => {
     setDraftTitle('');
@@ -95,6 +104,14 @@ export function TodosCard({
         <span style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{visible.length} open</span>
       }
     >
+      <div style={{ marginBottom: 12 }}>
+        <Input
+          value={query}
+          onChange={setQuery}
+          placeholder="Filter tasks..."
+          style={{ fontSize: 13, padding: '6px 10px' }}
+        />
+      </div>
       <ul
         style={{
           listStyle: 'none',
