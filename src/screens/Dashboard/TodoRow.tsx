@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { MouseEvent } from 'react';
 import type { Project, Todo } from '../../data/types';
 import { fmtDateKey, formatDueShort, isOverdue, isToday } from '../../data/helpers';
 import { Check } from '../../ui/Check';
@@ -9,11 +10,13 @@ export function TodoRow({
   projects,
   onUpdate,
   onDelete: _onDelete,
+  onContextMenu,
 }: {
   todo: Todo;
   projects: Project[];
   onUpdate: (patch: Partial<Todo>) => void;
   onDelete: () => void;
+  onContextMenu?: (e: MouseEvent) => void;
 }) {
   const [hover, setHover] = useState(false);
   const proj = projects.find((p) => p.id === todo.projectId);
@@ -29,6 +32,13 @@ export function TodoRow({
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onContextMenu={(e) => {
+        if (onContextMenu) {
+          e.preventDefault();
+          e.stopPropagation();
+          onContextMenu(e);
+        }
+      }}
       style={{
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto auto',

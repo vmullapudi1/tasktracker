@@ -8,6 +8,7 @@ import { Btn } from '../../ui/Btn';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import { TodoRow } from './TodoRow';
+import { ContextMenu, type ContextMenuItem } from '../../ui/ContextMenu';
 
 export function TodosCard({
   rep,
@@ -23,6 +24,7 @@ export function TodosCard({
   const [draftTitle, setDraftTitle] = useState('');
   const [draftProject, setDraftProject] = useState('');
   const [draftDue, setDraftDue] = useState(() => fmtDateKey(addDays(new Date(), 1)));
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
 
   const visible = todos
     .filter((t) => !t.done)
@@ -52,6 +54,24 @@ export function TodosCard({
     setDraftTitle('');
     setAdding(false);
   };
+
+  const handlePaste = () => {
+    try {
+      const raw = sessionStorage.getItem('TASKTRACK_CLIPBOARD');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.type === 'todo') {
+        const t = data.data as Todo;
+        setDraftTitle(t.title);
+        setDraftProject(t.projectId);
+        setDraftDue(t.due);
+      }
+    } catch (e) {
+      console.error('Paste failed', e);
+    }
+  };
+
+  const hasClipboard = sessionStorage.getItem('TASKTRACK_CLIPBOARD')?.includes('"type":"todo"');
 
   const updateTodo = (id: string, patch: Partial<Todo>) => {
     if (!rep) return;
@@ -87,6 +107,25 @@ export function TodosCard({
             projects={projects}
             onUpdate={(patch) => updateTodo(t.id, patch)}
             onDelete={() => deleteTodo(t.id)}
+            onContextMenu={(e) => {
+              setContextMenu({
+                x: e.clientX,
+                y: e.clientY,
+                items: [
+                  {
+                    label: 'Copy Task',
+                    onClick: () => {
+                      sessionStorage.setItem('TASKTRACK_CLIPBOARD', JSON.stringify({ type: 'todo', data: t }));
+                    },
+                  },
+                  {
+                    label: 'Delete',
+                    danger: true,
+                    onClick: () => deleteTodo(t.id),
+                  },
+                ],
+              });
+            }}
           />
         ))}
         {visible.length === 0 && !adding && <Empty>All caught up.</Empty>}
@@ -104,6 +143,28 @@ export function TodosCard({
             gap: 8,
           }}
         >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 10, color: 'var(--ink-3)', fontWeight: 600, textTransform: 'uppercase' }}>
+              New Task
+            </span>
+            {hasClipboard && (
+              <button
+                onClick={handlePaste}
+                style={{
+                  appearance: 'none',
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--accent)',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+              >
+                PASTE
+              </button>
+            )}
+          </div>
           <Input
             value={draftTitle}
             onChange={setDraftTitle}
@@ -149,6 +210,14 @@ export function TodosCard({
         >
           + new task
         </button>
+      )}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenu.items}
+          onClose={() => setContextMenu(null)}
+        />
       )}
     </Card>
   );

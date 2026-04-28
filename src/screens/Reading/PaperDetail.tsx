@@ -61,6 +61,13 @@ export function PaperDetail({
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <Btn
+            onClick={() => {
+              sessionStorage.setItem('TASKTRACK_CLIPBOARD', JSON.stringify({ type: 'paper', data: paper }));
+            }}
+          >
+            Copy
+          </Btn>
           <Btn variant={paper.read ? 'soft' : 'solid'} onClick={() => onUpdate({ read: !paper.read })}>
             {paper.read ? '✓ read' : 'mark as read'}
           </Btn>

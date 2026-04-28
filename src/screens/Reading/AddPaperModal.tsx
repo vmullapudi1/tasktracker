@@ -22,6 +22,25 @@ export function AddPaperModal({
   const [venue, setVenue] = useState('');
   const [projectId, setProjectId] = useState(projects.filter((p) => p.active)[0]?.id || '');
 
+  const handlePaste = () => {
+    try {
+      const raw = sessionStorage.getItem('TASKTRACK_CLIPBOARD');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.type === 'paper') {
+        const p = data.data;
+        setTitle(p.title);
+        setAuthors(p.authors);
+        setVenue(p.venue);
+        setProjectId(p.projectId);
+      }
+    } catch (e) {
+      console.error('Paste failed', e);
+    }
+  };
+
+  const hasClipboard = sessionStorage.getItem('TASKTRACK_CLIPBOARD')?.includes('"type":"paper"');
+
   const submit = () => {
     if (!rep || !title.trim()) return;
     void rep.mutate.addPaper({
@@ -44,12 +63,21 @@ export function AddPaperModal({
       onClose={onClose}
       title="Add paper"
       footer={
-        <>
-          <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="accent" onClick={submit}>
-            Add
-          </Btn>
-        </>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <div>
+            {hasClipboard && (
+              <Btn onClick={handlePaste}>
+                Paste
+              </Btn>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Btn onClick={onClose}>Cancel</Btn>
+            <Btn variant="accent" onClick={submit}>
+              Add
+            </Btn>
+          </div>
+        </div>
       }
     >
       <Field label="Title">
