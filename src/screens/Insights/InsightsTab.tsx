@@ -76,6 +76,15 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
     const mostWorkedProject = projects.find(p => p.id === mostWorkedPid);
     const mostTasksProject = projects.find(p => p.id === mostTasksPid);
 
+    // Weekly Rhythm (Mon-Sun)
+    const rhythm = new Array(7).fill(0);
+    filteredBlocks.forEach(b => {
+      const d = parseDateKey(b.date);
+      const day = d.getDay(); // 0 is Sun, 1 is Mon
+      const rhythmIdx = day === 0 ? 6 : day - 1; // Map to 0=Mon, ..., 6=Sun
+      rhythm[rhythmIdx] += (b.end - b.start) / 60;
+    });
+
     return {
       hours,
       doneCount,
@@ -87,7 +96,8 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
       mostWorkedHours: mostWorkedPid ? projectHours[mostWorkedPid] : 0,
       mostTasksProject,
       mostTasksCount: mostTasksPid ? projectTasks[mostTasksPid] : 0,
-      projectHours
+      projectHours,
+      rhythm
     };
   }, [filteredBlocks, filteredTodos, rangeDays, projects]);
 
@@ -104,6 +114,8 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
   }, [filteredBlocks, start, rangeDays]);
 
   const maxDaily = Math.max(...dailyData.map(d => d.h), 1);
+  const maxRhythm = Math.max(...stats.rhythm, 1);
+  const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
@@ -187,7 +199,7 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
         </Card>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
         <Card title="Time Allocation">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {projects.map(p => {
@@ -211,8 +223,30 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
           </div>
         </Card>
 
-        <Card title="Monthly Intensity">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Card title="Weekly Rhythm">
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 100, paddingBottom: 20 }}>
+            {stats.rhythm.map((h, i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div 
+                  title={`${WEEKDAYS[i]}: ${h.toFixed(1)}h`}
+                  style={{ 
+                    width: '100%', 
+                    background: 'var(--accent)', 
+                    height: `${(h / maxRhythm) * 100}%`,
+                    minHeight: h > 0 ? 2 : 0,
+                    borderRadius: 2,
+                    opacity: 0.6
+                  }} 
+                />
+                <div style={{ fontSize: 10, color: 'var(--ink-3)', fontFamily: 'var(--mono)' }}>{WEEKDAYS[i][0]}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--ink-3)', textAlign: 'center', marginTop: 4 }}>Total hours by day of week</div>
+        </Card>
+
+        <Card title="Intensity">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <IntensityRow label="Daily Average" value={stats.avgDay.toFixed(1)} unit="h" pct={Math.min(100, (stats.avgDay / 8) * 100)} />
             <IntensityRow label="Weekly Average" value={stats.avgWeek.toFixed(1)} unit="h" pct={Math.min(100, (stats.avgWeek / 40) * 100)} />
             <IntensityRow label="Monthly Projection" value={stats.avgMonth.toFixed(0)} unit="h" pct={Math.min(100, (stats.avgMonth / 160) * 100)} />
