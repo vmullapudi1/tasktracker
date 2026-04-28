@@ -22,12 +22,14 @@ export function Sidebar({
   sync,
   onPickFolder,
   onFlushNow,
+  onOpenSettings,
 }: {
   current: Tab;
   onSelect: (tab: Tab) => void;
   sync: SyncStatus;
   onPickFolder: () => void;
   onFlushNow: () => void;
+  onOpenSettings: () => void;
 }) {
   return (
     <aside
@@ -94,6 +96,30 @@ export function Sidebar({
       </nav>
 
       <div style={{ flex: 1 }} />
+
+      <button
+        onClick={onOpenSettings}
+        style={{
+          appearance: 'none',
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          padding: '8px 12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          color: 'var(--ink-2)',
+          fontSize: 13,
+          fontWeight: 500,
+          borderRadius: 6,
+          transition: 'background .12s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <span style={{ fontSize: 16 }}>⚙</span>
+        Settings
+      </button>
 
       <SyncBlock sync={sync} onPickFolder={onPickFolder} onFlushNow={onFlushNow} />
 
