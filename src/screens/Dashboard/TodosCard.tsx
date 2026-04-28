@@ -37,7 +37,7 @@ export function TodosCard({
   );
 
   const visible = useMemo(() => {
-    let base = query ? fuse.search(query).map((r) => r.item) : openTodos;
+    const base = query ? fuse.search(query).map((r) => r.item) : openTodos;
     return base.slice().sort((a, b) => (a.due ?? '').localeCompare(b.due ?? ''));
   }, [fuse, query, openTodos]);
 

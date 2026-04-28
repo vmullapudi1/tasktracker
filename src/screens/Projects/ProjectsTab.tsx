@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Project } from '../../data/types';
 import { uid } from '../../data/helpers';
 import { PROJECT_PALETTE } from '../../data/palette';
@@ -19,12 +19,12 @@ export function ProjectsTab({
   const projects = useProjects(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (navigatedId) {
-      setSelectedId(navigatedId);
-      onNavigated?.();
-    }
-  }, [navigatedId, onNavigated]);
+  const [lastNavigatedId, setLastNavigatedId] = useState<string | null>(null);
+  if (navigatedId !== lastNavigatedId) {
+    setLastNavigatedId(navigatedId ?? null);
+    if (navigatedId) setSelectedId(navigatedId);
+    onNavigated?.();
+  }
 
   const effectiveId = (selectedId && projects.some((p) => p.id === selectedId)) 
     ? selectedId 

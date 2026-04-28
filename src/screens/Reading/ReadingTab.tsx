@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Fuse from 'fuse.js';
 import type { Paper } from '../../data/types';
 import type { Rep } from '../../store/replicache';
@@ -27,12 +27,12 @@ export function ReadingTab({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    if (navigatedId) {
-      setSelectedId(navigatedId);
-      onNavigated?.();
-    }
-  }, [navigatedId, onNavigated]);
+  const [lastNavigatedId, setLastNavigatedId] = useState<string | null>(null);
+  if (navigatedId !== lastNavigatedId) {
+    setLastNavigatedId(navigatedId ?? null);
+    if (navigatedId) setSelectedId(navigatedId);
+    onNavigated?.();
+  }
 
   const effectiveId = (selectedId && papers.some((p) => p.id === selectedId)) 
     ? selectedId 
@@ -48,7 +48,7 @@ export function ReadingTab({
   );
 
   const filtered = useMemo(() => {
-    let base = query ? fuse.search(query).map((r) => r.item) : papers;
+    const base = query ? fuse.search(query).map((r) => r.item) : papers;
     return base
       .filter((p) => {
         if (filter === 'unread') return !p.read;

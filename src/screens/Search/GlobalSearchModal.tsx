@@ -1,8 +1,9 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import Fuse from 'fuse.js';
 import { Modal } from '../../ui/Modal';
 import { Input } from '../../ui/Input';
-import type { Project, Todo, Paper, Tab } from '../../data/types';
+import type { Project, Todo, Paper } from '../../data/types';
+import type { Tab } from '../../layout/Sidebar';
 import { ProjectDot } from '../../ui/ProjectDot';
 
 interface SearchItem {
@@ -103,9 +104,11 @@ export function GlobalSearchModal({
     return fuse.search(query).map((r) => r.item);
   }, [fuse, query, items]);
 
-  useEffect(() => {
+  const [lastQuery, setLastQuery] = useState('');
+  if (query !== lastQuery) {
+    setLastQuery(query);
     setActiveIndex(0);
-  }, [query]);
+  }
 
   const handleSelect = (item: SearchItem) => {
     let tab: Tab = 'dashboard';
