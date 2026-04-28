@@ -36,6 +36,28 @@ export const mutators = {
     await tx.set(KEY.project(args.id), j({ ...existing, ...args.patch }));
     await appendPending(tx, 'updateProject', args);
   },
+  async updateCheckpoint(tx: WriteTransaction, args: { projectId: string; phaseId: string; checkpointId: string; patch: Partial<Checkpoint> }): Promise<void> {
+    const project = r<Project>(await tx.get(KEY.project(args.projectId)));
+    if (!project) return;
+    const nextPhases = project.phases.map(ph => {
+      if (ph.id !== args.phaseId) return ph;
+      return {
+        ...ph,
+        checkpoints: ph.checkpoints.map(cp => {
+          if (cp.id !== args.checkpointId) return cp;
+          return { ...cp, ...args.patch };
+        })
+      };
+    });
+    // Check if phase is now done
+    const updatedPhases = nextPhases.map(ph => {
+      if (ph.id !== args.phaseId) return ph;
+      const allDone = ph.checkpoints.every(cp => cp.done);
+      return { ...ph, done: allDone };
+    });
+    await tx.set(KEY.project(args.projectId), j({ ...project, phases: updatedPhases }));
+    await appendPending(tx, 'updateCheckpoint', args);
+  },
   async deleteProject(tx: WriteTransaction, args: { id: string }): Promise<void> {
     await tx.del(KEY.project(args.id));
     await appendPending(tx, 'deleteProject', args);
