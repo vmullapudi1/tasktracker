@@ -11,11 +11,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons.svg', 'public/favicon.svg'],
       manifest: {
-        name: 'PhD Dashboard',
-        short_name: 'tasktrack',
+        name: 'PhD Dashboard | TaskTrack',
+        short_name: 'TaskTrack',
         description: 'Productivity tracker for PhD students',
-        theme_color: '#F6F6F6',
-        background_color: '#F6F6F6',
+        theme_color: '#1A1A1A',
+        background_color: '#1A1A1A',
         display: 'standalone',
         icons: [
           {

@@ -69,8 +69,8 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  darkMode: false,
-  accentHue: 250,
+  darkMode: true,
+  accentHue: 190,
   density: 'comfortable',
   showTodayRail: true,
 };
