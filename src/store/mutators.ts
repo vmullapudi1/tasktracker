@@ -1,5 +1,5 @@
 import type { ReadonlyJSONValue, WriteTransaction } from 'replicache';
-import type { Block, Paper, Project, Settings, Todo, WeeklyHighlight, AppData } from '../data/types';
+import type { Block, Checkpoint, Paper, Project, Settings, Todo, WeeklyHighlight, AppData } from '../data/types';
 import { DEFAULT_SETTINGS } from '../data/types';
 import { DEFAULT_META, KEY, PREFIX } from './schema';
 import type { MetaSnapshot, PendingEntry } from './schema';
