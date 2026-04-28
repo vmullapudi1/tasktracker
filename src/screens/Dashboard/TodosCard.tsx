@@ -24,6 +24,7 @@ export function TodosCard({
   const [draftTitle, setDraftTitle] = useState('');
   const [draftProject, setDraftProject] = useState('');
   const [draftDue, setDraftDue] = useState(() => fmtDateKey(addDays(new Date(), 1)));
+  const [draftTags, setDraftTags] = useState('');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
 
   const visible = todos
@@ -42,6 +43,7 @@ export function TodosCard({
     if (!rep) return;
     const title = draftTitle.trim();
     if (!title || !draftProject) return;
+    const tags = draftTags.split(',').map(t => t.trim()).filter(Boolean);
     const todo: Todo = {
       id: uid(),
       title,
@@ -49,9 +51,12 @@ export function TodosCard({
       due: draftDue,
       done: false,
       scheduled: false,
+      tags: tags.length > 0 ? tags : undefined,
+      status: 'todo',
     };
     await rep.mutate.addTodo(todo);
     setDraftTitle('');
+    setDraftTags('');
     setAdding(false);
   };
 
@@ -174,6 +179,11 @@ export function TodosCard({
               if (e.key === 'Enter') void submitNew();
               if (e.key === 'Escape') setAdding(false);
             }}
+          />
+          <Input
+            value={draftTags}
+            onChange={setDraftTags}
+            placeholder="Tags (e.g. #writing, admin)"
           />
           <div style={{ display: 'flex', gap: 8 }}>
             <Select value={draftProject} onChange={setDraftProject} style={{ flex: 1 }}>

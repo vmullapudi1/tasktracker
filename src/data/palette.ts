@@ -5,14 +5,14 @@ export interface ProjectPalette {
 }
 
 export const PROJECT_PALETTE: ProjectPalette[] = [
-  { fg: 'oklch(0.55 0.13 250)', bg: 'oklch(0.92 0.04 250)', ring: 'oklch(0.7 0.09 250)' },
-  { fg: 'oklch(0.5 0.12 30)', bg: 'oklch(0.92 0.04 30)', ring: 'oklch(0.65 0.09 30)' },
-  { fg: 'oklch(0.5 0.1 145)', bg: 'oklch(0.92 0.04 145)', ring: 'oklch(0.65 0.08 145)' },
-  { fg: 'oklch(0.5 0.12 300)', bg: 'oklch(0.92 0.04 300)', ring: 'oklch(0.65 0.09 300)' },
-  { fg: 'oklch(0.55 0.1 80)', bg: 'oklch(0.92 0.04 80)', ring: 'oklch(0.7 0.08 80)' },
-  { fg: 'oklch(0.5 0.1 200)', bg: 'oklch(0.92 0.04 200)', ring: 'oklch(0.65 0.08 200)' },
-  { fg: 'oklch(0.5 0.12 350)', bg: 'oklch(0.92 0.04 350)', ring: 'oklch(0.65 0.09 350)' },
-  { fg: 'oklch(0.5 0.05 60)', bg: 'oklch(0.92 0.02 60)', ring: 'oklch(0.65 0.04 60)' },
+  { fg: 'var(--p0-fg)', bg: 'var(--p0-bg)', ring: 'var(--p0-ring)' },
+  { fg: 'var(--p1-fg)', bg: 'var(--p1-bg)', ring: 'var(--p1-ring)' },
+  { fg: 'var(--p2-fg)', bg: 'var(--p2-bg)', ring: 'var(--p2-ring)' },
+  { fg: 'var(--p3-fg)', bg: 'var(--p3-bg)', ring: 'var(--p3-ring)' },
+  { fg: 'var(--p4-fg)', bg: 'var(--p4-bg)', ring: 'var(--p4-ring)' },
+  { fg: 'var(--p5-fg)', bg: 'var(--p5-bg)', ring: 'var(--p5-ring)' },
+  { fg: 'var(--p6-fg)', bg: 'var(--p6-bg)', ring: 'var(--p6-ring)' },
+  { fg: 'var(--p7-fg)', bg: 'var(--p7-bg)', ring: 'var(--p7-ring)' },
 ];
 
 export function paletteFor(idx: number): ProjectPalette {

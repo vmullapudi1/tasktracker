@@ -14,6 +14,15 @@
   --ink-2: oklch(0.4 0.015 60);
   --ink-3: oklch(0.55 0.012 60);
   --accent: oklch(0.5 0.13 250);
+
+  --p0-fg: oklch(0.55 0.13 250); --p0-bg: oklch(0.92 0.04 250); --p0-ring: oklch(0.7 0.09 250);
+  --p1-fg: oklch(0.5 0.12 30);   --p1-bg: oklch(0.92 0.04 30);  --p1-ring: oklch(0.65 0.09 30);
+  --p2-fg: oklch(0.5 0.1 145);  --p2-bg: oklch(0.92 0.04 145); --p2-ring: oklch(0.65 0.08 145);
+  --p3-fg: oklch(0.5 0.12 300);  --p3-bg: oklch(0.92 0.04 300); --p3-ring: oklch(0.65 0.09 300);
+  --p4-fg: oklch(0.55 0.1 80);   --p4-bg: oklch(0.92 0.04 80);  --p4-ring: oklch(0.7 0.08 80);
+  --p5-fg: oklch(0.5 0.1 200);  --p5-bg: oklch(0.92 0.04 200); --p5-ring: oklch(0.65 0.08 200);
+  --p6-fg: oklch(0.5 0.12 350);  --p6-bg: oklch(0.92 0.04 350); --p6-ring: oklch(0.65 0.09 350);
+  --p7-fg: oklch(0.5 0.05 60);   --p7-bg: oklch(0.92 0.02 60);  --p7-ring: oklch(0.65 0.04 60);
 }
 
 [data-theme='dark'] {
@@ -27,4 +36,13 @@
   --ink-soft: oklch(0.85 0.012 80);
   --ink-2: oklch(0.78 0.012 80);
   --ink-3: oklch(0.6 0.012 80);
+
+  --p0-fg: oklch(0.85 0.1 250);  --p0-bg: oklch(0.35 0.08 250); --p0-ring: oklch(0.6 0.09 250);
+  --p1-fg: oklch(0.85 0.1 30);   --p1-bg: oklch(0.35 0.08 30);  --p1-ring: oklch(0.6 0.09 30);
+  --p2-fg: oklch(0.85 0.08 145); --p2-bg: oklch(0.35 0.06 145); --p2-ring: oklch(0.6 0.08 145);
+  --p3-fg: oklch(0.85 0.1 300);  --p3-bg: oklch(0.35 0.08 300); --p3-ring: oklch(0.6 0.09 300);
+  --p4-fg: oklch(0.85 0.08 80);  --p4-bg: oklch(0.35 0.06 80);  --p4-ring: oklch(0.6 0.08 80);
+  --p5-fg: oklch(0.85 0.08 200); --p5-bg: oklch(0.35 0.06 200); --p5-ring: oklch(0.6 0.08 200);
+  --p6-fg: oklch(0.85 0.1 350);  --p6-bg: oklch(0.35 0.08 350); --p6-ring: oklch(0.6 0.09 350);
+  --p7-fg: oklch(0.85 0.04 60);  --p7-bg: oklch(0.35 0.02 60);  --p7-ring: oklch(0.6 0.04 60);
 }

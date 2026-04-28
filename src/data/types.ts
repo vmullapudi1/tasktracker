@@ -58,6 +58,8 @@ export interface Todo {
   due: string;
   done: boolean;
   scheduled: boolean;
+  tags?: string[];
+  status?: 'todo' | 'doing' | 'done';
 }
 
 export type Density = 'compact' | 'comfortable';

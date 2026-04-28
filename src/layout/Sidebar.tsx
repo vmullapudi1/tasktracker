@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { weekNumber } from '../data/helpers';
 import type { SyncStatus } from '../sync/sync-controller';
 
-export type Tab = 'dashboard' | 'calendar' | 'projects' | 'reading';
+export type Tab = 'dashboard' | 'calendar' | 'projects' | 'reading' | 'kanban' | 'insights';
 
 export interface TabSpec {
   id: Tab;
@@ -12,6 +12,8 @@ export interface TabSpec {
 export const TABS: TabSpec[] = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'calendar', label: 'Calendar' },
+  { id: 'kanban', label: 'Kanban' },
+  { id: 'insights', label: 'Insights' },
   { id: 'projects', label: 'Projects' },
   { id: 'reading', label: 'Reading' },
 ];

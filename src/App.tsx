@@ -11,6 +11,8 @@ import { DashboardTab } from './screens/Dashboard/DashboardTab';
 import { CalendarTab } from './screens/Calendar/CalendarTab';
 import { ProjectsTab } from './screens/Projects/ProjectsTab';
 import { ReadingTab } from './screens/Reading/ReadingTab';
+import { KanbanTab } from './screens/Kanban/KanbanTab';
+import { InsightsTab } from './screens/Insights/InsightsTab';
 import { SettingsModal } from './screens/Settings/SettingsModal';
 import { HelpModal } from './screens/Help/HelpModal';
 
@@ -108,6 +110,8 @@ export function App() {
       <Main tab={tab}>
         {tab === 'dashboard' && <DashboardTab rep={rep} onNav={setTab} />}
         {tab === 'calendar' && <CalendarTab rep={rep} />}
+        {tab === 'kanban' && <KanbanTab rep={rep} />}
+        {tab === 'insights' && <InsightsTab rep={rep} />}
         {tab === 'projects' && <ProjectsTab rep={rep} />}
         {tab === 'reading' && <ReadingTab rep={rep} />}
       </Main>

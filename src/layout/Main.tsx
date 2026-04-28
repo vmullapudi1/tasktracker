@@ -21,6 +21,10 @@ function headingFor(tab: Tab): Heading {
       return { title: 'Dashboard', sub: snapshotLabel() };
     case 'calendar':
       return { title: 'Calendar', sub: 'Log time by dragging across the grid.' };
+    case 'kanban':
+      return { title: 'Kanban', sub: 'Manage research tasks visually across columns.' };
+    case 'insights':
+      return { title: 'Insights', sub: 'Visualize your progress and momentum.' };
     case 'projects':
       return { title: 'Projects', sub: 'Define phases and track long-term progress.' };
     case 'reading':

@@ -1,11 +1,12 @@
 import type { Rep } from '../../store/replicache';
-import { useSettings } from '../../store/subscriptions';
+import { useBlocks, usePapers, useProjects, useSettings, useTodos } from '../../store/subscriptions';
 import { Modal } from '../../ui/Modal';
 import { Btn } from '../../ui/Btn';
 import { Field } from '../../ui/Field';
 import { Input } from '../../ui/Input';
 import { Select } from '../../ui/Select';
 import type { Density, Theme } from '../../data/types';
+import { downloadJSON, exportToMarkdown } from '../../data/export';
 
 const PRESET_COLORS = [
   { name: 'Cyan', hex: '#008491' },
@@ -20,6 +21,10 @@ const PRESET_COLORS = [
 
 export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () => void }) {
   const settings = useSettings(rep);
+  const projects = useProjects(rep);
+  const blocks = useBlocks(rep);
+  const papers = usePapers(rep);
+  const todos = useTodos(rep);
 
   const update = (patch: Partial<typeof settings>) => {
     if (!rep) return;
@@ -115,7 +120,7 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
       </Field>
 
       <Field label="Density">
-...        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
           {(['compact', 'comfortable'] as Density[]).map((d) => (
             <Btn key={d} variant={settings.density === d ? 'soft' : 'ghost'} onClick={() => update({ density: d })}>
               {d.charAt(0).toUpperCase() + d.slice(1)}
@@ -123,6 +128,18 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
           ))}
         </div>
       </Field>
+
+      <Field label="Data & Backup">
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Btn onClick={() => downloadJSON({ projects, blocks, papers, todos, settings }, 'tasktrack-data.json')}>
+            Export JSON
+          </Btn>
+          <Btn onClick={() => exportToMarkdown({ projects, blocks, papers, todos, settings })}>
+            Export Markdown
+          </Btn>
+        </div>
+      </Field>
+
 
       <Field label="Calendar Options">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

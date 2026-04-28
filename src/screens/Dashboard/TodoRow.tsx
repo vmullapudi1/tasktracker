@@ -53,16 +53,37 @@ export function TodoRow({
       }}
     >
       <Check checked={todo.done} onChange={(v) => onUpdate({ done: v })} size={15} />
-      <span
-        style={{
-          fontSize: 13,
-          color: 'var(--ink)',
-          textDecoration: todo.done ? 'line-through' : 'none',
-          opacity: todo.done ? 0.5 : 1,
-        }}
-      >
-        {todo.title}
-      </span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
+        <span
+          style={{
+            fontSize: 13,
+            color: 'var(--ink)',
+            textDecoration: todo.done ? 'line-through' : 'none',
+            opacity: todo.done ? 0.5 : 1,
+          }}
+        >
+          {todo.title}
+        </span>
+        {todo.tags && todo.tags.length > 0 && (
+          <div style={{ display: 'flex', gap: 4 }}>
+            {todo.tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  fontSize: 10,
+                  color: 'var(--accent)',
+                  background: 'var(--surface-2)',
+                  padding: '1px 5px',
+                  borderRadius: 4,
+                  fontWeight: 500,
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
       {proj ? <ProjectChip project={proj} /> : <span />}
       <span
         style={{
