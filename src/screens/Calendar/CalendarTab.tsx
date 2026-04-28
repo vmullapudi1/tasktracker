@@ -10,6 +10,7 @@ import { NowIndicator } from './NowIndicator';
 import { BlockPopover, type PopoverState, type RepeatOptions } from './BlockPopover';
 import { TodosCard } from '../Dashboard/TodosCard';
 import { ContextMenu, type ContextMenuItem } from '../../ui/ContextMenu';
+import { WeeklyHighlightsCard } from './WeeklyHighlightsCard';
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -394,8 +395,12 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
         paddingLeft: 20,
         overflowY: 'auto',
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
       }}
     >
+      <WeeklyHighlightsCard rep={rep} weekId={fmtDateKey(monday)} />
       <TodosCard rep={rep} todos={todos} projects={projects} />
     </div>
 
