@@ -1,7 +1,7 @@
 import { CSSProperties, useState } from 'react';
 import type { Project } from '../../data/types';
 import { paletteFor } from '../../data/palette';
-import { uid } from '../../data/helpers';
+import { uid, fmtDateKey } from '../../data/helpers';
 import { Btn } from '../../ui/Btn';
 import { EditableText } from '../../ui/EditableText';
 import { Field } from '../../ui/Field';
@@ -219,6 +219,26 @@ export function ProjectDetail({
       phases: project.phases.filter((ph) => ph.id !== phId),
     });
 
+  const addUpdate = () =>
+    onUpdate({
+      updates: [
+        ...(project.updates || []),
+        {
+          id: uid(),
+          date: fmtDateKey(new Date()),
+          text: 'New update',
+        },
+      ],
+    });
+  const updateUpdate = (uid: string, patch: Partial<NonNullable<Project['updates']>[number]>) =>
+    onUpdate({
+      updates: (project.updates || []).map((u) => (u.id === uid ? { ...u, ...patch } : u)),
+    });
+  const deleteUpdate = (uid: string) =>
+    onUpdate({
+      updates: (project.updates || []).filter((u) => u.id !== uid),
+    });
+
   return (
     <div
       style={{
@@ -385,6 +405,80 @@ export function ProjectDetail({
             />
           ))}
         </ul>
+      </section>
+
+      {/* Updates */}
+      <section style={{ marginTop: 28 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 12,
+          }}
+        >
+          <h3 style={{ ...sectionTitle, marginBottom: 0 }}>Progress updates</h3>
+          <Btn onClick={addUpdate}>+ update</Btn>
+        </div>
+        {(project.updates || []).length === 0 ? (
+          <Empty>No updates yet.</Empty>
+        ) : (
+          <ul
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            {(project.updates || [])
+              .slice()
+              .reverse()
+              .map((u) => (
+                <li
+                  key={u.id}
+                  style={{
+                    display: 'flex',
+                    gap: 12,
+                    padding: '10px 0',
+                    borderBottom: '1px solid var(--rule)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: 'var(--mono)',
+                      fontSize: 11,
+                      color: 'var(--ink-3)',
+                      width: 78,
+                      flexShrink: 0,
+                      paddingTop: 2,
+                    }}
+                  >
+                    {u.date}
+                  </span>
+                  <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-2)' }}>
+                    <EditableText value={u.text} onChange={(v) => updateUpdate(u.id, { text: v })} multiline />
+                  </span>
+                  <button
+                    onClick={() => deleteUpdate(u.id)}
+                    style={{
+                      appearance: 'none',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      color: 'var(--ink-3)',
+                      fontSize: 14,
+                      padding: '0 4px',
+                    }}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+          </ul>
+        )}
       </section>
     </div>
   );
