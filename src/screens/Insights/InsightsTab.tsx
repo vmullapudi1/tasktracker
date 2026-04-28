@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Rep } from '../../store/replicache';
-import { useBlocks, usePapers, useProjects, useTodos } from '../../store/subscriptions';
+import { useBlocks, useProjects, useTodos } from '../../store/subscriptions';
 import { Card } from '../../ui/Card';
 import { fmtDateKey, parseDateKey, addDays } from '../../data/helpers';
 import { Select } from '../../ui/Select';
@@ -11,7 +11,6 @@ type Preset = '7d' | '30d' | 'all' | 'custom';
 export function InsightsTab({ rep }: { rep: Rep | null }) {
   const projects = useProjects(rep);
   const blocks = useBlocks(rep);
-  const papers = usePapers(rep);
   const todos = useTodos(rep);
 
   const [preset, setPreset] = useState<Preset>('7d');
@@ -207,7 +206,7 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
               );
             })}
             {Object.keys(stats.projectHours).length === 0 && (
-              <div style={{ color: 'var(--ink-3)', fontSize: 13, textAlign: 'center', py: 20 }}>No activity in this range.</div>
+              <div style={{ color: 'var(--ink-3)', fontSize: 13, textAlign: 'center', padding: '20px 0' }}>No activity in this range.</div>
             )}
           </div>
         </Card>
