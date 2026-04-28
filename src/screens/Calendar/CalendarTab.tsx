@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { addDays, fmtDateKey, fmtTime, startOfWeek } from '../../data/helpers';
 import type { Rep } from '../../store/replicache';
+import { useBlocks, useProjects } from '../../store/subscriptions';
 import { Btn } from '../../ui/Btn';
 import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
 import { DayColumn } from './DayColumn';
@@ -17,11 +18,23 @@ function fmtWeekRange(monday: Date): string {
 
 const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-export function CalendarTab({ rep: _rep }: { rep: Rep | null }) {
+export function CalendarTab({ rep }: { rep: Rep | null }) {
   const [weekOffset, setWeekOffset] = useState(0);
   const monday = addDays(startOfWeek(new Date()), weekOffset * 7);
   const days = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const todayKey = fmtDateKey(new Date());
+
+  const projects = useProjects(rep);
+  const allBlocks = useBlocks(rep);
+  const blocksByDay = useMemo(() => {
+    const m = new Map<string, typeof allBlocks>();
+    for (const b of allBlocks) {
+      const arr = m.get(b.date) ?? [];
+      arr.push(b);
+      m.set(b.date, arr);
+    }
+    return m;
+  }, [allBlocks]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
@@ -162,9 +175,18 @@ export function CalendarTab({ rep: _rep }: { rep: Rep | null }) {
             </div>
           ))}
         </div>
-        {days.map((d) => (
-          <DayColumn key={d.toISOString()} date={d} />
-        ))}
+        {days.map((d) => {
+          const dateKey = fmtDateKey(d);
+          return (
+            <DayColumn
+              key={d.toISOString()}
+              date={d}
+              blocks={blocksByDay.get(dateKey) ?? []}
+              projects={projects}
+              onBlockClick={() => {}}
+            />
+          );
+        })}
         <NowIndicator monday={monday} />
       </div>
     </div>

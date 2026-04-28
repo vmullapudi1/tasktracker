@@ -1,7 +1,20 @@
 import { useRef } from 'react';
+import type { MouseEvent } from 'react';
+import type { Block, Project } from '../../data/types';
 import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
+import { BlockEl } from './BlockEl';
 
-export function DayColumn({ date: _date }: { date: Date }) {
+export function DayColumn({
+  date: _date,
+  blocks,
+  projects,
+  onBlockClick,
+}: {
+  date: Date;
+  blocks: Block[];
+  projects: Project[];
+  onBlockClick: (block: Block, e: MouseEvent) => void;
+}) {
   const ref = useRef<HTMLDivElement | null>(null);
   return (
     <div
@@ -41,6 +54,10 @@ export function DayColumn({ date: _date }: { date: Date }) {
             }}
           />
         </div>
+      ))}
+
+      {blocks.map((b) => (
+        <BlockEl key={b.id} block={b} projects={projects} onClick={(e) => onBlockClick(b, e)} />
       ))}
     </div>
   );
