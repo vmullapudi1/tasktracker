@@ -12,7 +12,12 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
 
   const filtered = useMemo(() => {
     const list = projectId === 'all' ? todos : todos.filter((t) => t.projectId === projectId);
-    return [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    return [...list].sort((a, b) => {
+      const ao = a.order ?? 0;
+      const bo = b.order ?? 0;
+      if (ao !== bo) return ao - bo;
+      return a.id.localeCompare(b.id);
+    });
   }, [todos, projectId]);
 
   const columns = {
@@ -22,40 +27,43 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
   };
 
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const moveTodo = (id: string, newStatus: 'todo' | 'doing' | 'done', targetId?: string) => {
     if (!rep) return;
-    const todo = todos.find((t) => t.id === id);
-    if (!todo) return;
+    const movingTodo = todos.find((t) => t.id === id);
+    if (!movingTodo) return;
 
-    const columnTodos = columns[newStatus];
-    let newOrder = 0;
+    // 1. Get current items for this column (excluding moving one)
+    const columnTodos = columns[newStatus].filter((t) => t.id !== id);
 
-    if (targetId) {
-      const targetIdx = columnTodos.findIndex((t) => t.id === targetId);
-      if (targetIdx !== -1) {
-        const prev = columnTodos[targetIdx - 1];
-        const next = columnTodos[targetIdx];
-        if (!prev) {
-          newOrder = (next.order ?? 0) - 100;
-        } else {
-          newOrder = ((prev.order ?? 0) + (next.order ?? 0)) / 2;
-        }
+    // 2. Determine insertion index
+    const targetIdx = targetId ? columnTodos.findIndex((t) => t.id === targetId) : columnTodos.length;
+
+    // 3. Create new list with moving item at target index
+    const resultList = [...columnTodos];
+    resultList.splice(targetIdx === -1 ? resultList.length : targetIdx, 0, { ...movingTodo, status: newStatus });
+
+    // 4. Re-assign orders to ALL items in this column to ensure stable, clean spacing
+    resultList.forEach((t, i) => {
+      const newOrder = (i + 1) * 100;
+      const isMoving = t.id === id;
+      const statusChanged = t.status !== newStatus;
+      const doneChanged = (newStatus === 'done') !== t.done;
+      const orderChanged = t.order !== newOrder;
+
+      if (isMoving || statusChanged || doneChanged || orderChanged) {
+        void rep.mutate.updateTodo({
+          id: t.id,
+          patch: {
+            status: newStatus,
+            done: newStatus === 'done',
+            order: newOrder,
+          },
+        });
       }
-    } else {
-      // Append to end
-      const last = columnTodos[columnTodos.length - 1];
-      newOrder = (last?.order ?? 0) + 100;
-    }
-
-    void rep.mutate.updateTodo({
-      id,
-      patch: { 
-        status: newStatus, 
-        done: newStatus === 'done',
-        order: newOrder
-      },
     });
+    setDragOverId(null);
   };
 
   return (
@@ -66,7 +74,9 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
           <Select value={projectId} onChange={setProjectId}>
             <option value="all">All Projects</option>
             {projects.map((p) => (
-              <option key={p.id} value={p.id}>{p.code} — {p.name}</option>
+              <option key={p.id} value={p.id}>
+                {p.code} — {p.name}
+              </option>
             ))}
           </Select>
         </div>
@@ -91,35 +101,53 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
               if (id) moveTodo(id, col);
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
-              <h3 style={{ margin: 0, fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', color: 'var(--ink-3)', letterSpacing: '0.05em' }}>
+            <div
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: 11,
+                  fontFamily: 'var(--mono)',
+                  textTransform: 'uppercase',
+                  color: 'var(--ink-3)',
+                  letterSpacing: '0.05em',
+                }}
+              >
                 {col} ({columns[col].length})
               </h3>
             </div>
-            
+
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {columns[col].map((t) => (
-                <div 
-                  key={t.id} 
-                  style={{ 
-                    background: 'var(--paper)', 
-                    padding: '12px', 
-                    borderRadius: 8, 
+                <div
+                  key={t.id}
+                  style={{
+                    background: 'var(--paper)',
+                    padding: '12px',
+                    borderRadius: 8,
                     border: '1px solid var(--rule)',
+                    borderTop: dragOverId === t.id ? '3px solid var(--accent)' : '1px solid var(--rule)',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                     cursor: 'grab',
-                    opacity: draggedId === t.id ? 0.5 : 1
+                    opacity: draggedId === t.id ? 0.5 : 1,
+                    transition: 'border-top .1s',
                   }}
                   draggable
                   onDragStart={(e) => {
                     e.dataTransfer.setData('todoId', t.id);
                     setDraggedId(t.id);
                   }}
-                  onDragEnd={() => setDraggedId(null)}
+                  onDragEnd={() => {
+                    setDraggedId(null);
+                    setDragOverId(null);
+                  }}
                   onDragOver={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (draggedId !== t.id) setDragOverId(t.id);
                   }}
+                  onDragLeave={() => setDragOverId(null)}
                   onDrop={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -129,15 +157,26 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
                     }
                   }}
                 >
-                  <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 500, marginBottom: 8 }}>{t.title}</div>
+                  <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 500, marginBottom: 8 }}>
+                    {t.title}
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {projects.find(p => p.id === t.projectId) && (
-                      <ProjectChip project={projects.find(p => p.id === t.projectId)!} />
+                    {projects.find((p) => p.id === t.projectId) && (
+                      <ProjectChip project={projects.find((p) => p.id === t.projectId)!} />
                     )}
                     {t.tags && t.tags.length > 0 && (
                       <div style={{ display: 'flex', gap: 4 }}>
-                        {t.tags.map(tag => (
-                          <span key={tag} style={{ fontSize: 10, color: 'var(--accent)', background: 'var(--surface-2)', padding: '2px 6px', borderRadius: 4 }}>
+                        {t.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            style={{
+                              fontSize: 10,
+                              color: 'var(--accent)',
+                              background: 'var(--surface-2)',
+                              padding: '2px 6px',
+                              borderRadius: 4,
+                            }}
+                          >
                             {tag}
                           </span>
                         ))}
