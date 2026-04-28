@@ -48,6 +48,15 @@ const HELP_STEPS = [
     ),
   },
   {
+    title: '📱 Install as App',
+    content: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <p>You can install TaskTrack as a <b>Progressive Web App (PWA)</b> for a seamless, native-like experience.</p>
+        <p>In Google Chrome or Edge, click the <b>Install</b> icon (usually a monitor with a down arrow) in the address bar, or open the browser menu and select "Install TaskTrack".</p>
+      </div>
+    ),
+  },
+  {
     title: '⚙️ Settings & Sync',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
