@@ -8,6 +8,7 @@ import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
 import { DayColumn, type DragState } from './DayColumn';
 import { NowIndicator } from './NowIndicator';
 import { BlockPopover, type PopoverState } from './BlockPopover';
+import { TodosCard } from '../Dashboard/TodosCard';
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -109,10 +110,21 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
+    <div style={{ display: 'flex', height: '100%', gap: 20 }}>
+      {/* Main Calendar View */}
       <div
         style={{
           display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          flex: 1,
+          minWidth: 0,
+          height: '100%',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 4px',
@@ -167,7 +179,7 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
           <Kbd>drag</Kbd> a slot to create a block
         </span>
         <span>
-          <Kbd>drop</Kbd> a todo from the dashboard to schedule it
+          <Kbd>drop</Kbd> a todo from the sidebar to schedule it
         </span>
       </div>
 
@@ -269,8 +281,22 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
         })}
         <NowIndicator monday={monday} />
       </div>
+    </div>
 
-      {popover && (
+    {/* Todo Sidebar */}
+    <div
+      style={{
+        width: 320,
+        borderLeft: '1px solid var(--rule)',
+        paddingLeft: 20,
+        overflowY: 'auto',
+        height: '100%',
+      }}
+    >
+      <TodosCard rep={rep} todos={todos} projects={projects} />
+    </div>
+
+    {popover && (
         <BlockPopover
           state={popover}
           projects={projects}
