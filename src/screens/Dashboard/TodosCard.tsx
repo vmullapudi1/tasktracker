@@ -126,7 +126,7 @@ export function TodosCard({
           </div>
           <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
             <Btn onClick={() => setAdding(false)}>Cancel</Btn>
-            <Btn variant="solid" onClick={submitNew}>
+            <Btn variant="accent" onClick={submitNew}>
               Add
             </Btn>
           </div>

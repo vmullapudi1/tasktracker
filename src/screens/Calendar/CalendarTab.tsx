@@ -147,17 +147,22 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
               onClick={() => setWeekOffset(0)}
               style={{
                 appearance: 'none',
-                border: 'none',
+                border: '1px solid var(--accent)',
                 background: 'transparent',
                 cursor: 'pointer',
-                fontSize: 11,
+                fontSize: 10,
                 color: 'var(--accent)',
-                font: 'inherit',
+                fontFamily: 'var(--mono)',
+                padding: '2px 8px',
+                borderRadius: 4,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
               }}
             >
               jump to today
             </button>
           )}
+
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           <Btn onClick={() => setWeekOffset((w) => w - 1)}>← prev</Btn>

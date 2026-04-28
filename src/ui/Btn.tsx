@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react';
 
-type Variant = 'ghost' | 'solid' | 'soft' | 'danger';
+type Variant = 'ghost' | 'solid' | 'soft' | 'danger' | 'accent';
 type Size = 'sm' | 'md';
 
 const SIZES: Record<Size, CSSProperties> = {
@@ -12,6 +12,7 @@ const VARIANTS: Record<Variant, CSSProperties> = {
   ghost: { background: 'transparent', color: 'var(--ink-2)', border: '1px solid var(--rule)' },
   solid: { background: 'var(--ink)', color: 'var(--paper)', border: '1px solid var(--ink)' },
   soft: { background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid transparent' },
+  accent: { background: 'var(--accent)', color: 'white', border: '1px solid var(--accent)' },
   danger: {
     background: 'transparent',
     color: 'oklch(0.5 0.13 25)',
@@ -23,6 +24,7 @@ const HOVER: Record<Variant, string> = {
   ghost: 'var(--surface-2)',
   solid: 'var(--ink-soft)',
   soft: 'var(--rule)',
+  accent: 'var(--accent)', // will refine with opacity or shade if needed
   danger: 'oklch(0.95 0.02 25)',
 };
 

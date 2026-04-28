@@ -46,7 +46,7 @@ export function AddPaperModal({
       footer={
         <>
           <Btn onClick={onClose}>Cancel</Btn>
-          <Btn variant="solid" onClick={submit}>
+          <Btn variant="accent" onClick={submit}>
             Add
           </Btn>
         </>

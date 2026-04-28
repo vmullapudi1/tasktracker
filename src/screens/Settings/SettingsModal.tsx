@@ -26,7 +26,7 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
   };
 
   return (
-    <Modal open onClose={onClose} title="Appearance Settings" footer={<Btn onClick={onClose}>Close</Btn>}>
+    <Modal open onClose={onClose} title="Appearance Settings" footer={<Btn variant="accent" onClick={onClose}>Close</Btn>}>
       <Field label="Dashboard Name">
         <Input
           value={settings.dashboardName}

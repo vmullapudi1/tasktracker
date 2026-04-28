@@ -50,7 +50,7 @@ export function Sidebar({
             width: 28,
             height: 28,
             borderRadius: 6,
-            background: 'var(--ink)',
+            background: 'var(--accent)',
             color: 'var(--paper)',
             display: 'flex',
             alignItems: 'center',
@@ -174,7 +174,7 @@ function NavBtn({
       style={{
         ...NAV_BASE,
         fontWeight: active ? 600 : 500,
-        color: active ? 'var(--ink)' : 'var(--ink-2)',
+        color: active ? 'var(--accent)' : 'var(--ink-2)',
         background: baseBg,
         boxShadow: active ? '0 1px 2px rgba(0,0,0,0.04)' : 'none',
       }}
