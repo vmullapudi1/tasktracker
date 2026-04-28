@@ -93,7 +93,7 @@ export function PaperDetail({
         }}
       >
         <div style={sectionTitle}>Summary</div>
-        <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6 }}>
+        <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.6, fontFamily: 'var(--sans)' }}>
           <EditableText
             value={paper.summary}
             onChange={(v) => onUpdate({ summary: v })}

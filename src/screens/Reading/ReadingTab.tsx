@@ -154,7 +154,7 @@ export function ReadingTab({ rep }: { rep: Rep | null }) {
                         height: 8,
                         borderRadius: 999,
                         background: p.read ? 'transparent' : 'var(--accent)',
-                        border: p.read ? '1.5px solid var(--rule-strong)' : 'none',
+                        border: p.read ? '1px solid var(--rule-strong)' : 'none',
                         flexShrink: 0,
                         marginTop: 5,
                       }}

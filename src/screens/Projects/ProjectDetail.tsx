@@ -294,7 +294,7 @@ export function ProjectDetail({
           <div
             style={{
               display: 'flex',
-              gap: 16,
+              gap: 8,
               marginTop: 8,
               fontSize: 12,
               color: 'var(--ink-3)',
@@ -304,6 +304,7 @@ export function ProjectDetail({
             <span>
               {project.hoursLogged}h / {project.targetHours}h target
             </span>
+            <span>·</span>
             <span>
               {doneCheckpoints}/{totalCheckpoints} checkpoints
             </span>
@@ -365,7 +366,7 @@ export function ProjectDetail({
                 key={phase.id}
                 style={{
                   flex: 1,
-                  height: 8,
+                  height: 10,
                   borderRadius: 3,
                   background: 'var(--rule)',
                   position: 'relative',
@@ -381,6 +382,24 @@ export function ProjectDetail({
                     width: phaseFrac * 100 + '%',
                   }}
                 />
+                {/* Checkpoint ticks */}
+                {cps.length > 1 &&
+                  cps.map((_, idx) =>
+                    idx > 0 ? (
+                      <div
+                        key={idx}
+                        style={{
+                          position: 'absolute',
+                          left: (idx / cps.length) * 100 + '%',
+                          top: 0,
+                          bottom: 0,
+                          width: 1,
+                          background: 'var(--paper)',
+                          opacity: 0.3,
+                        }}
+                      />
+                    ) : null,
+                  )}
               </div>
             );
           })}
