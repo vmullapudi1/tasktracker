@@ -76,7 +76,7 @@ export function Sidebar({
               color: 'var(--ink)',
             }}
           >
-            {dashboardName}
+            {dashboardName || 'PhD Dashboard'}
           </div>
           <div
             style={{
