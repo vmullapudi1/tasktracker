@@ -3,6 +3,8 @@ import { addDays, fmtDateKey, fmtTime, startOfWeek } from '../../data/helpers';
 import type { Rep } from '../../store/replicache';
 import { Btn } from '../../ui/Btn';
 import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
+import { DayColumn } from './DayColumn';
+import { NowIndicator } from './NowIndicator';
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -161,15 +163,9 @@ export function CalendarTab({ rep: _rep }: { rep: Rep | null }) {
           ))}
         </div>
         {days.map((d) => (
-          <div
-            key={d.toISOString()}
-            style={{
-              position: 'relative',
-              height: (HOUR_END - HOUR_START) * HOUR_HEIGHT,
-              borderLeft: '1px solid var(--rule)',
-            }}
-          />
+          <DayColumn key={d.toISOString()} date={d} />
         ))}
+        <NowIndicator monday={monday} />
       </div>
     </div>
   );
