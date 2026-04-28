@@ -23,6 +23,7 @@ export function Sidebar({
   onPickFolder,
   onFlushNow,
   onOpenSettings,
+  dashboardName,
 }: {
   current: Tab;
   onSelect: (tab: Tab) => void;
@@ -30,6 +31,7 @@ export function Sidebar({
   onPickFolder: () => void;
   onFlushNow: () => void;
   onOpenSettings: () => void;
+  dashboardName: string;
 }) {
   return (
     <aside
@@ -70,7 +72,7 @@ export function Sidebar({
               color: 'var(--ink)',
             }}
           >
-            PhD Dashboard
+            {dashboardName}
           </div>
           <div
             style={{

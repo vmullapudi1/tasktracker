@@ -15,6 +15,7 @@ export function Card({
 }) {
   return (
     <section
+      className="card"
       style={{
         background: 'var(--paper)',
         border: '1px solid var(--rule)',

@@ -37,10 +37,28 @@ export function App() {
   const syncStatus = useSyncStatus(sync);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = settings.darkMode ? 'dark' : 'light';
-    document.documentElement.dataset.density = settings.density;
-    document.documentElement.style.setProperty('--accent', `oklch(0.5 0.13 ${settings.accentHue})`);
-  }, [settings.darkMode, settings.accentHue, settings.density]);
+    const resolveTheme = () => {
+      if (settings.theme === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return settings.theme;
+    };
+
+    const apply = () => {
+      document.documentElement.dataset.theme = resolveTheme();
+      document.documentElement.dataset.density = settings.density;
+      document.documentElement.style.setProperty('--accent', `oklch(0.5 0.13 ${settings.accentHue}deg)`);
+    };
+
+    apply();
+
+    if (settings.theme === 'system') {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => apply();
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
+  }, [settings.theme, settings.accentHue, settings.density]);
 
   const handlePickFolder = useCallback(async () => {
     if (!sync) return;
@@ -69,6 +87,7 @@ export function App() {
         onPickFolder={handlePickFolder}
         onFlushNow={handleFlushNow}
         onOpenSettings={() => setSettingsOpen(true)}
+        dashboardName={settings.dashboardName}
       />
       <Main tab={tab}>
         {tab === 'dashboard' && <DashboardTab rep={rep} onNav={setTab} />}

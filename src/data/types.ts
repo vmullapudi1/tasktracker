@@ -60,19 +60,22 @@ export interface Todo {
 }
 
 export type Density = 'compact' | 'comfortable';
+export type Theme = 'light' | 'dark' | 'system';
 
 export interface Settings {
-  darkMode: boolean;
+  theme: Theme;
   accentHue: number;
   density: Density;
   showTodayRail: boolean;
+  dashboardName: string;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  darkMode: true,
+  theme: 'dark',
   accentHue: 190,
   density: 'comfortable',
   showTodayRail: true,
+  dashboardName: 'PhD Dashboard',
 };
 
 export interface AppData {

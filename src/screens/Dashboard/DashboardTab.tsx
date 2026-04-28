@@ -14,18 +14,19 @@ export function DashboardTab({ rep, onNav }: { rep: Rep | null; onNav: (tab: Tab
 
   return (
     <div
+      className="dashboard-grid"
       style={{
         display: 'grid',
         gridTemplateColumns: '1.4fr 1fr',
-        gap: 20,
+        gap: 'var(--section-gap)',
         alignItems: 'start',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--section-gap)' }}>
         <TimeSpentCard projects={projects} blocks={blocks} />
         <ProgressCard projects={projects} />
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--section-gap)' }}>
         <RecentPapersCard papers={papers} projects={projects} onGoToReading={() => onNav('reading')} />
         <TodosCard rep={rep} todos={todos} projects={projects} />
       </div>

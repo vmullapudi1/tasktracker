@@ -3,7 +3,8 @@ import { useSettings } from '../../store/subscriptions';
 import { Modal } from '../../ui/Modal';
 import { Btn } from '../../ui/Btn';
 import { Field } from '../../ui/Field';
-import type { Density } from '../../data/types';
+import { Input } from '../../ui/Input';
+import type { Density, Theme } from '../../data/types';
 
 export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () => void }) {
   const settings = useSettings(rep);
@@ -15,14 +16,21 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
 
   return (
     <Modal open onClose={onClose} title="Appearance Settings" footer={<Btn onClick={onClose}>Close</Btn>}>
+      <Field label="Dashboard Name">
+        <Input
+          value={settings.dashboardName}
+          onChange={(v) => update({ dashboardName: v })}
+          placeholder="PhD Dashboard"
+        />
+      </Field>
+
       <Field label="Theme">
         <div style={{ display: 'flex', gap: 8 }}>
-          <Btn variant={!settings.darkMode ? 'soft' : 'ghost'} onClick={() => update({ darkMode: false })}>
-            Light
-          </Btn>
-          <Btn variant={settings.darkMode ? 'soft' : 'ghost'} onClick={() => update({ darkMode: true })}>
-            Dark
-          </Btn>
+          {(['light', 'dark', 'system'] as Theme[]).map((t) => (
+            <Btn key={t} variant={settings.theme === t ? 'soft' : 'ghost'} onClick={() => update({ theme: t })}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </Btn>
+          ))}
         </div>
       </Field>
 
@@ -46,7 +54,7 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
       </Field>
 
       <Field label="Density">
-        <div style={{ display: 'flex', gap: 8 }}>
+...        <div style={{ display: 'flex', gap: 8 }}>
           {(['compact', 'comfortable'] as Density[]).map((d) => (
             <Btn key={d} variant={settings.density === d ? 'soft' : 'ghost'} onClick={() => update({ density: d })}>
               {d.charAt(0).toUpperCase() + d.slice(1)}

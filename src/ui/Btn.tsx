@@ -36,6 +36,7 @@ export function Btn({ children, variant = 'ghost', size = 'sm', style, onMouseEn
   const baseBg = VARIANTS[variant].background as string;
   return (
     <button
+      className="btn"
       {...rest}
       style={{
         appearance: 'none',

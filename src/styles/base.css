@@ -60,3 +60,51 @@ select:focus {
 a {
   color: inherit;
 }
+
+/* --- Density --- */
+
+[data-density='compact'] {
+  --sidebar-padding: 16px 12px;
+  --sidebar-header-mb: 12px;
+  --card-padding: 12px 14px;
+  --card-header-mb: 10px;
+  --btn-padding: 4px 10px;
+  --btn-font: 12px;
+  --section-gap: 12px;
+}
+
+[data-density='comfortable'] {
+  --sidebar-padding: 24px 16px;
+  --sidebar-header-mb: 22px;
+  --card-padding: 18px 20px 20px;
+  --card-header-mb: 14px;
+  --btn-padding: 7px 14px;
+  --btn-font: 13px;
+  --section-gap: 20px;
+}
+
+aside {
+  padding: var(--sidebar-padding) !important;
+  gap: var(--sidebar-header-mb) !important;
+}
+
+aside > div:first-child {
+  padding-bottom: var(--sidebar-header-mb) !important;
+}
+
+.card {
+  padding: var(--card-padding) !important;
+}
+
+.card header {
+  margin-bottom: var(--card-header-mb) !important;
+}
+
+.btn {
+  padding: var(--btn-padding) !important;
+  font-size: var(--btn-font) !important;
+}
+
+.dashboard-grid {
+  gap: var(--section-gap) !important;
+}
