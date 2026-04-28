@@ -4,6 +4,7 @@ import { useBlocks, usePapers, useProjects, useTodos } from '../../store/subscri
 import { TimeSpentCard } from './TimeSpentCard';
 import { ProgressCard } from './ProgressCard';
 import { RecentPapersCard } from './RecentPapersCard';
+import { TodosCard } from './TodosCard';
 
 export function DashboardTab({ rep, onNav }: { rep: Rep | null; onNav: (tab: Tab) => void }) {
   const projects = useProjects(rep);
@@ -26,30 +27,8 @@ export function DashboardTab({ rep, onNav }: { rep: Rep | null; onNav: (tab: Tab
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <RecentPapersCard papers={papers} projects={projects} onGoToReading={() => onNav('reading')} />
-        <Placeholder title="To-do" detail={`${todos.filter((t) => !t.done).length} open`} />
+        <TodosCard rep={rep} todos={todos} projects={projects} />
       </div>
     </div>
-  );
-}
-
-function Placeholder({ title, detail }: { title: string; detail: string }) {
-  return (
-    <section
-      style={{
-        background: 'var(--paper)',
-        border: '1px solid var(--rule)',
-        borderRadius: 10,
-        padding: 20,
-        minHeight: 120,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
-    >
-      <h2 style={{ fontFamily: 'var(--serif)', fontSize: 18, fontWeight: 500, margin: 0, color: 'var(--ink)' }}>
-        {title}
-      </h2>
-      <span style={{ fontSize: 12, color: 'var(--ink-3)', fontStyle: 'italic' }}>{detail}</span>
-    </section>
   );
 }
