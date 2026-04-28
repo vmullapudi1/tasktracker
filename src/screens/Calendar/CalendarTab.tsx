@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react';
-import { addDays, fmtDateKey, fmtTime, startOfWeek } from '../../data/helpers';
+import { addDays, fmtDateKey, fmtTime, startOfWeek, uid } from '../../data/helpers';
+import type { Block } from '../../data/types';
 import type { Rep } from '../../store/replicache';
 import { useBlocks, useProjects } from '../../store/subscriptions';
 import { Btn } from '../../ui/Btn';
 import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
-import { DayColumn } from './DayColumn';
+import { DayColumn, type DragState } from './DayColumn';
 import { NowIndicator } from './NowIndicator';
+import { BlockPopover, type PopoverState } from './BlockPopover';
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,6 +37,51 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
     }
     return m;
   }, [allBlocks]);
+
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const [popover, setPopover] = useState<PopoverState | null>(null);
+
+  const handleCreateBlock = ({
+    dateKey,
+    startMin,
+    endMin,
+    clientX,
+    clientY,
+  }: {
+    dateKey: string;
+    startMin: number;
+    endMin: number;
+    clientX: number;
+    clientY: number;
+  }) => {
+    const defaultProject = projects.find((p) => p.active) ?? projects[0];
+    if (!defaultProject) return;
+    const newBlock: Block = {
+      id: uid(),
+      date: dateKey,
+      start: startMin,
+      end: endMin,
+      title: '',
+      projectId: defaultProject.id,
+    };
+    setPopover({ block: newBlock, isNew: true, anchor: { x: clientX, y: clientY } });
+  };
+
+  const savePopover = (patch: Pick<Block, 'title' | 'projectId' | 'start' | 'end'>) => {
+    if (!popover || !rep) return;
+    if (popover.isNew) {
+      void rep.mutate.addBlock({ ...popover.block, ...patch });
+    } else {
+      void rep.mutate.updateBlock({ id: popover.block.id, patch });
+    }
+    setPopover(null);
+  };
+
+  const deletePopover = () => {
+    if (!popover || !rep || popover.isNew) return;
+    void rep.mutate.deleteBlock({ id: popover.block.id });
+    setPopover(null);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
@@ -175,20 +222,37 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
             </div>
           ))}
         </div>
-        {days.map((d) => {
+        {days.map((d, di) => {
           const dateKey = fmtDateKey(d);
           return (
             <DayColumn
               key={d.toISOString()}
               date={d}
+              dateKey={dateKey}
+              dayIdx={di}
               blocks={blocksByDay.get(dateKey) ?? []}
               projects={projects}
-              onBlockClick={() => {}}
+              drag={drag}
+              setDrag={setDrag}
+              onBlockClick={(block, e) =>
+                setPopover({ block, isNew: false, anchor: { x: e.clientX, y: e.clientY } })
+              }
+              onCreateBlock={handleCreateBlock}
             />
           );
         })}
         <NowIndicator monday={monday} />
       </div>
+
+      {popover && (
+        <BlockPopover
+          state={popover}
+          projects={projects}
+          onClose={() => setPopover(null)}
+          onSave={savePopover}
+          onDelete={popover.isNew ? undefined : deletePopover}
+        />
+      )}
     </div>
   );
 }
