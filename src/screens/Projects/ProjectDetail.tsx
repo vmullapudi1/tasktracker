@@ -1,10 +1,13 @@
-import type { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 import type { Project } from '../../data/types';
 import { paletteFor } from '../../data/palette';
+import { uid } from '../../data/helpers';
 import { Btn } from '../../ui/Btn';
 import { EditableText } from '../../ui/EditableText';
 import { Field } from '../../ui/Field';
 import { Input } from '../../ui/Input';
+import { Check } from '../../ui/Check';
+import { Empty } from '../../ui/Empty';
 
 export const sectionTitle: CSSProperties = {
   fontSize: 11,
@@ -15,6 +18,177 @@ export const sectionTitle: CSSProperties = {
   fontWeight: 600,
   margin: '0 0 12px',
 };
+
+function PhaseRow({
+  phase,
+  index,
+  onUpdate,
+  onDelete,
+}: {
+  phase: Project['phases'][number];
+  index: number;
+  onUpdate: (patch: Partial<Project['phases'][number]>) => void;
+  onDelete: () => void;
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const cps = phase.checkpoints || [];
+
+  const updateCp = (cpId: string, patch: Partial<NonNullable<Project['phases'][number]['checkpoints']>[number]>) =>
+    onUpdate({
+      checkpoints: cps.map((c) => (c.id === cpId ? { ...c, ...patch } : c)),
+    });
+  const addCp = () =>
+    onUpdate({
+      checkpoints: [...cps, { id: uid(), name: 'New checkpoint', done: false }],
+    });
+  const deleteCp = (cpId: string) =>
+    onUpdate({
+      checkpoints: cps.filter((c) => c.id !== cpId),
+    });
+
+  return (
+    <li
+      style={{
+        border: '1px solid var(--rule)',
+        borderRadius: 8,
+        background: phase.done ? 'var(--surface-2)' : 'transparent',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: '10px 12px',
+        }}
+      >
+        <Check checked={phase.done} onChange={(v) => onUpdate({ done: v })} />
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 11,
+            color: 'var(--ink-3)',
+            width: 24,
+          }}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <span
+          style={{
+            flex: 1,
+            fontSize: 14,
+            fontWeight: 500,
+            color: 'var(--ink)',
+            textDecoration: phase.done ? 'line-through' : 'none',
+            opacity: phase.done ? 0.6 : 1,
+          }}
+        >
+          <EditableText value={phase.name} onChange={(v) => onUpdate({ name: v })} />
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 11,
+            color: 'var(--ink-3)',
+          }}
+        >
+          {cps.filter((c) => c.done).length}/{cps.length}
+        </span>
+        <button
+          onClick={() => setExpanded((e) => !e)}
+          style={{
+            appearance: 'none',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            color: 'var(--ink-3)',
+            fontSize: 11,
+            font: 'inherit',
+          }}
+        >
+          {expanded ? '▾' : '▸'}
+        </button>
+        <button
+          onClick={onDelete}
+          style={{
+            appearance: 'none',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            color: 'var(--ink-3)',
+            fontSize: 14,
+          }}
+        >
+          ×
+        </button>
+      </div>
+      {expanded && (
+        <div
+          style={{
+            padding: '0 12px 12px 50px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
+        >
+          {cps.map((cp) => (
+            <div
+              key={cp.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '4px 0',
+              }}
+            >
+              <Check checked={cp.done} onChange={(v) => updateCp(cp.id, { done: v })} size={14} />
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: 13,
+                  color: 'var(--ink-2)',
+                  textDecoration: cp.done ? 'line-through' : 'none',
+                  opacity: cp.done ? 0.55 : 1,
+                }}
+              >
+                <EditableText value={cp.name} onChange={(v) => updateCp(cp.id, { name: v })} />
+              </span>
+              <button
+                onClick={() => deleteCp(cp.id)}
+                style={{
+                  appearance: 'none',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  color: 'var(--ink-3)',
+                  fontSize: 12,
+                }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addCp}
+            style={{
+              appearance: 'none',
+              border: 'none',
+              background: 'transparent',
+              cursor: 'pointer',
+              color: 'var(--ink-3)',
+              fontSize: 12,
+              font: 'inherit',
+              padding: '4px 0',
+              alignSelf: 'flex-start',
+            }}
+          >
+            + checkpoint
+          </button>
+        </div>
+      )}
+    </li>
+  );
+}
 
 export function ProjectDetail({
   project,
@@ -31,6 +205,19 @@ export function ProjectDetail({
     (s, ph) => s + (ph.checkpoints?.filter((c) => c.done).length ?? 0),
     0,
   );
+
+  const addPhase = () =>
+    onUpdate({
+      phases: [...project.phases, { id: uid(), name: 'New phase', done: false, checkpoints: [] }],
+    });
+  const updatePhase = (phId: string, patch: Partial<Project['phases'][number]>) =>
+    onUpdate({
+      phases: project.phases.map((ph) => (ph.id === phId ? { ...ph, ...patch } : ph)),
+    });
+  const deletePhase = (phId: string) =>
+    onUpdate({
+      phases: project.phases.filter((ph) => ph.id !== phId),
+    });
 
   return (
     <div
@@ -130,6 +317,74 @@ export function ProjectDetail({
             />
           </Field>
         </div>
+      </section>
+
+      {/* Phases */}
+      <section style={{ marginTop: 24 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 12,
+          }}
+        >
+          <h3 style={{ ...sectionTitle, marginBottom: 0 }}>Phases & checkpoints</h3>
+          <Btn onClick={addPhase}>+ phase</Btn>
+        </div>
+
+        {/* Phase progress bar preview */}
+        <div style={{ display: 'flex', gap: 3, marginBottom: 16 }}>
+          {project.phases.map((phase) => {
+            const cps = phase.checkpoints || [];
+            const cpsDone = cps.filter((c) => c.done).length;
+            const phaseFrac = phase.done ? 1 : cps.length ? cpsDone / cps.length : 0;
+            return (
+              <div
+                key={phase.id}
+                style={{
+                  flex: 1,
+                  height: 8,
+                  borderRadius: 3,
+                  background: 'var(--rule)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: pal.fg,
+                    opacity: phase.done ? 1 : 0.55,
+                    width: phaseFrac * 100 + '%',
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <ul
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          {project.phases.map((phase, i) => (
+            <PhaseRow
+              key={phase.id}
+              phase={phase}
+              index={i}
+              onUpdate={(patch) => updatePhase(phase.id, patch)}
+              onDelete={() => deletePhase(phase.id)}
+            />
+          ))}
+        </ul>
       </section>
     </div>
   );
