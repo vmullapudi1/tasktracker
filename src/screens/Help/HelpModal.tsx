@@ -69,7 +69,7 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
       onClose={onClose}
       title={HELP_STEPS[step].title}
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', flex: 1 }}>
           <div style={{ display: 'flex', gap: 6 }}>
             {HELP_STEPS.map((_, i) => (
               <div
@@ -78,7 +78,7 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
                   width: 6,
                   height: 6,
                   borderRadius: 999,
-                  background: step === i ? 'var(--accent)' : 'var(--rule)',
+                  background: step === i ? 'var(--accent)' : 'var(--rule-strong)',
                 }}
               />
             ))}
@@ -86,11 +86,11 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
           <div style={{ display: 'flex', gap: 8 }}>
             {step > 0 && <Btn onClick={() => setStep(step - 1)}>Back</Btn>}
             {isLast ? (
-              <Btn variant="accent" onClick={onClose}>
+              <Btn variant="solid" onClick={onClose}>
                 Done
               </Btn>
             ) : (
-              <Btn variant="accent" onClick={() => setStep(step + 1)}>
+              <Btn variant="solid" onClick={() => setStep(step + 1)}>
                 Next
               </Btn>
             )}

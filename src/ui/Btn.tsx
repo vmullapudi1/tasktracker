@@ -9,7 +9,7 @@ const SIZES: Record<Size, CSSProperties> = {
 };
 
 const VARIANTS: Record<Variant, CSSProperties> = {
-  ghost: { background: 'transparent', color: 'var(--ink-2)', border: '1px solid var(--rule)' },
+  ghost: { background: 'transparent', color: 'var(--ink-2)', border: '1px solid var(--rule-strong)' },
   solid: { background: 'var(--ink)', color: 'var(--paper)', border: '1px solid var(--ink)' },
   soft: { background: 'var(--surface-2)', color: 'var(--ink)', border: '1px solid transparent' },
   accent: { background: 'var(--accent)', color: 'white', border: '1px solid var(--accent)' },

@@ -63,7 +63,7 @@ export function AddPaperModal({
       onClose={onClose}
       title="Add paper"
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', flex: 1 }}>
           <div>
             {hasClipboard && (
               <Btn onClick={handlePaste}>
