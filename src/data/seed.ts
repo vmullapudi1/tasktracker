@@ -273,5 +273,5 @@ export function seedData(): AppData {
     { id: uid(), title: 'Submit conference abstract', projectId: 'p2', due: fmtDateKey(addDays(today, 10)), done: false, scheduled: false },
   ];
 
-  return { projects, blocks, papers, todos, settings: { ...DEFAULT_SETTINGS } };
+  return { projects, blocks, papers, todos, highlights: [], settings: { ...DEFAULT_SETTINGS } };
 }

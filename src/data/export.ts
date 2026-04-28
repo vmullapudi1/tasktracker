@@ -50,6 +50,16 @@ export function exportToMarkdown(data: AppData) {
     if (paper.takeaway) content += `#### Takeaway\n> ${paper.takeaway}\n\n`;
   });
 
+  if (data.highlights && data.highlights.length > 0) {
+    content += `## Weekly Highlights\n\n`;
+    data.highlights.forEach((h) => {
+      content += `### Week of ${h.id}\n`;
+      if (h.top3) content += `**Top 3 items:**\n${h.top3}\n\n`;
+      if (h.movedForward) content += `**What moved forward:**\n${h.movedForward}\n\n`;
+      if (h.stalled) content += `**What stalled progress:**\n${h.stalled}\n\n`;
+    });
+  }
+
   const blob = new Blob([content], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

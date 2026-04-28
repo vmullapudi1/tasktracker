@@ -1,5 +1,5 @@
 import type { ReadTransaction } from 'replicache';
-import type { AppData, Block, Paper, Project, Settings, Todo } from '../data/types';
+import type { AppData, Block, Paper, Project, Settings, Todo, WeeklyHighlight } from '../data/types';
 import { DEFAULT_SETTINGS } from '../data/types';
 import { KEY, PREFIX } from './schema';
 import type { Rep } from './replicache';
@@ -23,14 +23,15 @@ async function scanPrefix<T>(tx: ReadTransaction, prefix: string): Promise<T[]> 
 
 export async function readAppData(rep: Rep): Promise<AppData> {
   return rep.query(async (tx) => {
-    const [projects, blocks, papers, todos] = await Promise.all([
+    const [projects, blocks, papers, todos, highlights] = await Promise.all([
       scanPrefix<Project>(tx, PREFIX.project),
       scanPrefix<Block>(tx, PREFIX.block),
       scanPrefix<Paper>(tx, PREFIX.paper),
       scanPrefix<Todo>(tx, PREFIX.todo),
+      scanPrefix<WeeklyHighlight>(tx, PREFIX.highlight),
     ]);
     const settings = ((await tx.get(KEY.settings)) as Settings | undefined) ?? { ...DEFAULT_SETTINGS };
-    return { projects, blocks, papers, todos, settings };
+    return { projects, blocks, papers, todos, highlights, settings };
   });
 }
 
@@ -51,6 +52,7 @@ export async function hashAppData(data: AppData): Promise<string> {
     blocks: [...data.blocks].sort((a, b) => a.id.localeCompare(b.id)),
     papers: [...data.papers].sort((a, b) => a.id.localeCompare(b.id)),
     todos: [...data.todos].sort((a, b) => a.id.localeCompare(b.id)),
+    highlights: [...(data.highlights ?? [])].sort((a, b) => a.id.localeCompare(b.id)),
     settings: data.settings,
   };
   const enc = new TextEncoder().encode(JSON.stringify(stable));

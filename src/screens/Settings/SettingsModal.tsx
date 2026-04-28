@@ -1,5 +1,5 @@
 import type { Rep } from '../../store/replicache';
-import { useBlocks, usePapers, useProjects, useSettings, useTodos } from '../../store/subscriptions';
+import { useBlocks, useHighlights, usePapers, useProjects, useSettings, useTodos } from '../../store/subscriptions';
 import { Modal } from '../../ui/Modal';
 import { Btn } from '../../ui/Btn';
 import { Field } from '../../ui/Field';
@@ -25,6 +25,7 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
   const blocks = useBlocks(rep);
   const papers = usePapers(rep);
   const todos = useTodos(rep);
+  const highlights = useHighlights(rep);
 
   const update = (patch: Partial<typeof settings>) => {
     if (!rep) return;
@@ -131,10 +132,10 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
 
       <Field label="Data & Backup">
         <div style={{ display: 'flex', gap: 8 }}>
-          <Btn onClick={() => downloadJSON({ projects, blocks, papers, todos, settings }, 'tasktrack-data.json')}>
+          <Btn onClick={() => downloadJSON({ projects, blocks, papers, todos, highlights, settings }, 'tasktrack-data.json')}>
             Export JSON
           </Btn>
-          <Btn onClick={() => exportToMarkdown({ projects, blocks, papers, todos, settings })}>
+          <Btn onClick={() => exportToMarkdown({ projects, blocks, papers, todos, highlights, settings })}>
             Export Markdown
           </Btn>
         </div>
