@@ -3,8 +3,9 @@ import type { Tab } from '../../layout/Sidebar';
 import { useBlocks, usePapers, useProjects, useTodos } from '../../store/subscriptions';
 import { TimeSpentCard } from './TimeSpentCard';
 import { ProgressCard } from './ProgressCard';
+import { RecentPapersCard } from './RecentPapersCard';
 
-export function DashboardTab({ rep, onNav: _onNav }: { rep: Rep | null; onNav: (tab: Tab) => void }) {
+export function DashboardTab({ rep, onNav }: { rep: Rep | null; onNav: (tab: Tab) => void }) {
   const projects = useProjects(rep);
   const blocks = useBlocks(rep);
   const papers = usePapers(rep);
@@ -24,7 +25,7 @@ export function DashboardTab({ rep, onNav: _onNav }: { rep: Rep | null; onNav: (
         <ProgressCard projects={projects} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <Placeholder title="Recent reading" detail={`${papers.filter((p) => p.read).length} read`} />
+        <RecentPapersCard papers={papers} projects={projects} onGoToReading={() => onNav('reading')} />
         <Placeholder title="To-do" detail={`${todos.filter((t) => !t.done).length} open`} />
       </div>
     </div>
