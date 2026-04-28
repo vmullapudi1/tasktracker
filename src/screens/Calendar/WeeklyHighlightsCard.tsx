@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { Rep } from '../../store/replicache';
 import { useHighlights } from '../../store/subscriptions';
 import { Card } from '../../ui/Card';
@@ -19,21 +19,28 @@ export function WeeklyHighlightsCard({ rep, weekId, style }: Props) {
     stalled: '',
   });
 
-  useEffect(() => {
+  const [lastWeekId, setLastWeekId] = useState(weekId);
+  if (weekId !== lastWeekId) {
+    setLastWeekId(weekId);
+    setLocal(
+      highlight
+        ? { top3: highlight.top3, movedForward: highlight.movedForward, stalled: highlight.stalled }
+        : { top3: '', movedForward: '', stalled: '' }
+    );
+  }
+
+  // Also sync if highlight changes from external source while on same week
+  const [lastHighlight, setLastHighlight] = useState(highlight);
+  if (highlight !== lastHighlight) {
+    setLastHighlight(highlight);
     if (highlight) {
       setLocal({
         top3: highlight.top3,
         movedForward: highlight.movedForward,
         stalled: highlight.stalled,
       });
-    } else {
-      setLocal({
-        top3: '',
-        movedForward: '',
-        stalled: '',
-      });
     }
-  }, [highlight, weekId]);
+  }
 
   const save = useCallback(
     (patch: { top3?: string; movedForward?: string; stalled?: string }) => {

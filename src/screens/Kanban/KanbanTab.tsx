@@ -4,7 +4,6 @@ import { useTodos, useProjects } from '../../store/subscriptions';
 import { Empty } from '../../ui/Empty';
 import { ProjectChip } from '../../ui/ProjectChip';
 import { Select } from '../../ui/Select';
-import type { Todo } from '../../data/types';
 
 export function KanbanTab({ rep }: { rep: Rep | null }) {
   const todos = useTodos(rep);
