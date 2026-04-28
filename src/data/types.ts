@@ -73,6 +73,7 @@ export interface Settings {
   calendarEndHour: number;
   timeFormat: '12h' | '24h';
   firstDayOfWeek: 'monday' | 'sunday';
+  hasSeenHelp: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -85,6 +86,7 @@ export const DEFAULT_SETTINGS: Settings = {
   calendarEndHour: 22,
   timeFormat: '12h',
   firstDayOfWeek: 'monday',
+  hasSeenHelp: false,
 };
 
 export interface AppData {

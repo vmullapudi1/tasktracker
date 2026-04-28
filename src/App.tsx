@@ -12,12 +12,14 @@ import { CalendarTab } from './screens/Calendar/CalendarTab';
 import { ProjectsTab } from './screens/Projects/ProjectsTab';
 import { ReadingTab } from './screens/Reading/ReadingTab';
 import { SettingsModal } from './screens/Settings/SettingsModal';
+import { HelpModal } from './screens/Help/HelpModal';
 
 export function App() {
   const [rep, setRep] = useState<Rep | null>(null);
   const [sync, setSync] = useState<SyncController | null>(null);
   const [tab, setTab] = useState<Tab>('dashboard');
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -35,6 +37,12 @@ export function App() {
 
   const settings = useSettings(rep);
   const syncStatus = useSyncStatus(sync);
+
+  useEffect(() => {
+    if (rep && settings && !settings.hasSeenHelp) {
+      setHelpOpen(true);
+    }
+  }, [rep, settings?.hasSeenHelp]);
 
   useEffect(() => {
     const resolveTheme = () => {
@@ -71,6 +79,13 @@ export function App() {
     await sync.flushNow();
   }, [sync]);
 
+  const handleCloseHelp = useCallback(() => {
+    setHelpOpen(false);
+    if (rep && settings && !settings.hasSeenHelp) {
+      void rep.mutate.updateSettings({ hasSeenHelp: true });
+    }
+  }, [rep, settings?.hasSeenHelp]);
+
   return (
     <div
       style={{
@@ -87,6 +102,7 @@ export function App() {
         onPickFolder={handlePickFolder}
         onFlushNow={handleFlushNow}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenHelp={() => setHelpOpen(true)}
         dashboardName={settings.dashboardName}
       />
       <Main tab={tab}>
@@ -96,6 +112,7 @@ export function App() {
         {tab === 'reading' && <ReadingTab rep={rep} />}
       </Main>
       {settingsOpen && <SettingsModal rep={rep} onClose={() => setSettingsOpen(false)} />}
+      {helpOpen && <HelpModal onClose={handleCloseHelp} />}
     </div>
   );
 }

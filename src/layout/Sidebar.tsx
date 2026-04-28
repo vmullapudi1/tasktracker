@@ -23,6 +23,7 @@ export function Sidebar({
   onPickFolder,
   onFlushNow,
   onOpenSettings,
+  onOpenHelp,
   dashboardName,
 }: {
   current: Tab;
@@ -31,6 +32,7 @@ export function Sidebar({
   onPickFolder: () => void;
   onFlushNow: () => void;
   onOpenSettings: () => void;
+  onOpenHelp: () => void;
   dashboardName: string;
 }) {
   return (
@@ -99,29 +101,55 @@ export function Sidebar({
 
       <div style={{ flex: 1 }} />
 
-      <button
-        onClick={onOpenSettings}
-        style={{
-          appearance: 'none',
-          border: 'none',
-          background: 'transparent',
-          cursor: 'pointer',
-          padding: '8px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          color: 'var(--ink-2)',
-          fontSize: 13,
-          fontWeight: 500,
-          borderRadius: 6,
-          transition: 'background .12s',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <span style={{ fontSize: 16 }}>⚙</span>
-        Settings
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <button
+          onClick={onOpenHelp}
+          style={{
+            appearance: 'none',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            padding: '8px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            color: 'var(--ink-2)',
+            fontSize: 13,
+            fontWeight: 500,
+            borderRadius: 6,
+            transition: 'background .12s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+        >
+          <span style={{ fontSize: 16 }}>?</span>
+          Help
+        </button>
+
+        <button
+          onClick={onOpenSettings}
+          style={{
+            appearance: 'none',
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            padding: '8px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            color: 'var(--ink-2)',
+            fontSize: 13,
+            fontWeight: 500,
+            borderRadius: 6,
+            transition: 'background .12s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+        >
+          <span style={{ fontSize: 16 }}>⚙</span>
+          Settings
+        </button>
+      </div>
 
       <SyncBlock sync={sync} onPickFolder={onPickFolder} onFlushNow={onFlushNow} />
 
