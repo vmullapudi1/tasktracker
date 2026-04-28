@@ -10,17 +10,28 @@ export function TodoRow({
   projects,
   onUpdate,
   onContextMenu,
+  selected,
+  onSelect,
 }: {
   todo: Todo;
   projects: Project[];
   onUpdate: (patch: Partial<Todo>) => void;
   onDelete: () => void;
   onContextMenu?: (e: MouseEvent) => void;
+  selected?: boolean;
+  onSelect?: (v: boolean) => void;
 }) {
   const [hover, setHover] = useState(false);
   const proj = projects.find((p) => p.id === todo.projectId);
   const overdue = todo.due ? !todo.done && isOverdue(todo.due) && !isToday(todo.due) : false;
   const dueToday = todo.due ? isToday(todo.due) : false;
+
+  const priorityColor = (p?: string) => {
+    if (p === 'high') return 'oklch(0.6 0.18 20)';
+    if (p === 'medium') return 'oklch(0.75 0.15 70)';
+    if (p === 'low') return 'oklch(0.8 0.1 140)';
+    return 'transparent';
+  };
 
   return (
     <li
@@ -40,7 +51,7 @@ export function TodoRow({
       }}
       style={{
         display: 'grid',
-        gridTemplateColumns: 'auto 1fr auto auto',
+        gridTemplateColumns: 'auto auto 1fr auto auto',
         alignItems: 'center',
         gap: 10,
         padding: '8px 8px',
@@ -49,9 +60,15 @@ export function TodoRow({
         background: hover ? 'var(--surface-2)' : 'transparent',
         cursor: 'grab',
         transition: 'background .12s',
+        borderLeft: `3px solid ${priorityColor(todo.priority)}`,
       }}
     >
-      <Check checked={todo.done} onChange={(v) => onUpdate({ done: v })} size={15} />
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        {onSelect && (
+          <Check checked={!!selected} onChange={onSelect} size={14} />
+        )}
+        <Check checked={todo.done} onChange={(v) => onUpdate({ done: v })} size={15} />
+      </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center' }}>
         <span
           style={{

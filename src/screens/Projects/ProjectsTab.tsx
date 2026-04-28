@@ -3,7 +3,7 @@ import type { Project } from '../../data/types';
 import { uid } from '../../data/helpers';
 import { PROJECT_PALETTE } from '../../data/palette';
 import type { Rep } from '../../store/replicache';
-import { useProjects } from '../../store/subscriptions';
+import { useProjects, useTodos } from '../../store/subscriptions';
 import { ProjectList } from './ProjectList';
 import { ProjectDetail } from './ProjectDetail';
 
@@ -17,6 +17,7 @@ export function ProjectsTab({
   onNavigated?: () => void;
 }) {
   const projects = useProjects(rep);
+  const todos = useTodos(rep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [lastNavigatedId, setLastNavigatedId] = useState<string | null>(null);
@@ -94,7 +95,14 @@ export function ProjectsTab({
     >
       <ProjectList projects={projects} selectedId={effectiveId} onSelect={setSelectedId} onAdd={addProject} />
       {selected ? (
-        <ProjectDetail key={selected.id} project={selected} onUpdate={update} onDelete={deleteSelected} />
+        <ProjectDetail 
+          key={selected.id} 
+          project={selected} 
+          allTodos={todos} 
+          onUpdate={update} 
+          onDelete={deleteSelected} 
+          rep={rep}
+        />
       ) : (
         <div
           style={{

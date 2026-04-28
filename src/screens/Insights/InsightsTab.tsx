@@ -65,7 +65,7 @@ export function InsightsTab({ rep }: { rep: Rep | null }) {
     });
     
     filteredTodos.forEach(t => {
-      if (t.done) {
+      if (t.done && t.projectId) {
         projectTasks[t.projectId] = (projectTasks[t.projectId] || 0) + 1;
       }
     });

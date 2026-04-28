@@ -25,9 +25,11 @@ export function TodosCard({
   const [draftTitle, setDraftTitle] = useState('');
   const [draftProject, setDraftProject] = useState('');
   const [draftDue, setDraftDue] = useState(() => fmtDateKey(addDays(new Date(), 1)));
+  const [draftPriority, setDraftPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [draftTags, setDraftTags] = useState('');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
   const [query, setQuery] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const openTodos = useMemo(() => todos.filter((t) => !t.done), [todos]);
 
@@ -45,23 +47,25 @@ export function TodosCard({
     setDraftTitle('');
     setDraftProject(activeProjects[0]?.id ?? projects[0]?.id ?? '');
     setDraftDue(fmtDateKey(addDays(new Date(), 1)));
+    setDraftPriority('medium');
     setAdding(true);
   };
 
   const submitNew = async () => {
     if (!rep) return;
     const title = draftTitle.trim();
-    if (!title || !draftProject) return;
+    if (!title) return;
     const tags = draftTags.split(',').map(t => t.trim()).filter(Boolean);
     const todo: Todo = {
       id: uid(),
       title,
-      projectId: draftProject,
+      projectId: draftProject || undefined,
       due: draftDue,
       done: false,
       scheduled: false,
       tags: tags.length > 0 ? tags : undefined,
       status: 'todo',
+      priority: draftPriority,
     };
     await rep.mutate.addTodo(todo);
     setDraftTitle('');
@@ -77,8 +81,9 @@ export function TodosCard({
       if (data.type === 'todo') {
         const t = data.data as Todo;
         setDraftTitle(t.title);
-        setDraftProject(t.projectId);
+        setDraftProject(t.projectId || '');
         setDraftDue(t.due);
+        setDraftPriority(t.priority || 'medium');
       }
     } catch (e) {
       console.error('Paste failed', e);
@@ -97,11 +102,33 @@ export function TodosCard({
     void rep.mutate.deleteTodo({ id });
   };
 
+  const toggleSelection = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const bulkAction = (patch: Partial<Todo>) => {
+    if (!rep || selectedIds.size === 0) return;
+    void rep.mutate.bulkUpdateTodos({ ids: Array.from(selectedIds), patch });
+    setSelectedIds(new Set());
+  };
+
   return (
     <Card
       title="To-do"
       action={
-        <span style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{visible.length} open</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {selectedIds.size > 0 && (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <Btn size="sm" onClick={() => bulkAction({ priority: 'high' })}>High</Btn>
+              <Btn size="sm" onClick={() => bulkAction({ priority: 'medium' })}>Med</Btn>
+              <Btn size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>Clear</Btn>
+            </div>
+          )}
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>{visible.length} open</span>
+        </div>
       }
     >
       <div style={{ marginBottom: 12 }}>
@@ -129,6 +156,8 @@ export function TodosCard({
             projects={projects}
             onUpdate={(patch) => updateTodo(t.id, patch)}
             onDelete={() => deleteTodo(t.id)}
+            selected={selectedIds.has(t.id)}
+            onSelect={() => toggleSelection(t.id)}
             onContextMenu={(e) => {
               setContextMenu({
                 x: e.clientX,
@@ -197,13 +226,21 @@ export function TodosCard({
               if (e.key === 'Escape') setAdding(false);
             }}
           />
-          <Input
-            value={draftTags}
-            onChange={setDraftTags}
-            placeholder="Tags (e.g. #writing, admin)"
-          />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            <Select value={draftPriority} onChange={(v) => setDraftPriority(v as 'low' | 'medium' | 'high')}>
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
+            </Select>
+            <Input
+              value={draftTags}
+              onChange={setDraftTags}
+              placeholder="Tags (e.g. #writing, admin)"
+            />
+          </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Select value={draftProject} onChange={setDraftProject} style={{ flex: 1 }}>
+              <option value="">— No Project (Inbox) —</option>
               {activeProjects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.code} — {p.name}

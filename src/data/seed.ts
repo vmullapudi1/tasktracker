@@ -264,13 +264,14 @@ export function seedData(): AppData {
   ];
 
   const todos: Todo[] = [
-    { id: uid(), title: 'Email IRB amendment for sleep study', projectId: 'p2', due: fmtDateKey(addDays(today, 1)), done: false, scheduled: false },
-    { id: uid(), title: 'Run cohort B subject S09', projectId: 'p1', due: fmtDateKey(addDays(today, 2)), done: false, scheduled: false },
-    { id: uid(), title: 'Grade midterm batch 2', projectId: 'p4', due: fmtDateKey(addDays(today, 3)), done: false, scheduled: false },
-    { id: uid(), title: 'Stats problem set 6', projectId: 'p3', due: fmtDateKey(addDays(today, 4)), done: false, scheduled: false },
-    { id: uid(), title: 'Draft methods §2.3', projectId: 'p1', due: fmtDateKey(addDays(today, 5)), done: false, scheduled: false },
-    { id: uid(), title: 'Reply to Voss et al. follow-up email', projectId: 'p1', due: fmtDateKey(addDays(today, 6)), done: false, scheduled: false },
-    { id: uid(), title: 'Submit conference abstract', projectId: 'p2', due: fmtDateKey(addDays(today, 10)), done: false, scheduled: false },
+    { id: uid(), title: 'Email IRB amendment for sleep study', projectId: 'p2', due: fmtDateKey(addDays(today, 1)), done: false, scheduled: false, priority: 'high' },
+    { id: uid(), title: 'Run cohort B subject S09', projectId: 'p1', due: fmtDateKey(addDays(today, 2)), done: false, scheduled: false, priority: 'medium' },
+    { id: uid(), title: 'Grade midterm batch 2', projectId: 'p4', due: fmtDateKey(addDays(today, 3)), done: false, scheduled: false, priority: 'low' },
+    { id: uid(), title: 'Stats problem set 6', projectId: 'p3', due: fmtDateKey(addDays(today, 4)), done: false, scheduled: false, priority: 'medium' },
+    { id: uid(), title: 'Draft methods §2.3', projectId: 'p1', due: fmtDateKey(addDays(today, 5)), done: false, scheduled: false, priority: 'high' },
+    { id: uid(), title: 'Reply to Voss et al. follow-up email', projectId: 'p1', due: fmtDateKey(addDays(today, 6)), done: false, scheduled: false, priority: 'low' },
+    { id: uid(), title: 'Submit conference abstract', projectId: 'p2', due: fmtDateKey(addDays(today, 10)), done: false, scheduled: false, priority: 'high' },
+    { id: uid(), title: 'Buy desk organizer', due: fmtDateKey(addDays(today, 0)), done: false, scheduled: false, priority: 'medium' },
   ];
 
   return { projects, blocks, papers, todos, highlights: [], settings: { ...DEFAULT_SETTINGS } };

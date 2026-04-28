@@ -54,13 +54,14 @@ export interface Paper {
 export interface Todo {
   id: string;
   title: string;
-  projectId: string;
+  projectId?: string;
   due: string;
   done: boolean;
   scheduled: boolean;
   tags?: string[];
   status?: 'todo' | 'doing' | 'done';
   order?: number;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export interface WeeklyHighlight {

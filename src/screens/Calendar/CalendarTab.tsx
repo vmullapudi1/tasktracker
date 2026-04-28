@@ -194,13 +194,16 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
     const todo = todos.find((t) => t.id === todoId);
     if (!todo) return;
     const dur = 60;
+    const defaultProj = projects.find(p => p.active) || projects[0];
+    if (!defaultProj && !todo.projectId) return;
+
     const block: Block = {
       id: uid(),
       date: dateKey,
       start: startMin,
       end: Math.min(HOUR_END * 60, startMin + dur),
       title: todo.title,
-      projectId: todo.projectId,
+      projectId: todo.projectId || defaultProj.id,
     };
     void rep.mutate.scheduleTodo({ todoId, block });
   };

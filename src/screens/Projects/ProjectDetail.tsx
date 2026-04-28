@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { Project } from '../../data/types';
+import { useState, useMemo } from 'react';
+import type { Project, Todo } from '../../data/types';
 import { paletteFor } from '../../data/palette';
 import { uid, fmtDateKey } from '../../data/helpers';
 import { Btn } from '../../ui/Btn';
@@ -9,6 +9,8 @@ import { Input } from '../../ui/Input';
 import { Check } from '../../ui/Check';
 import { Empty } from '../../ui/Empty';
 import { SECTION_TITLE_STYLE } from '../../styles/shared';
+import { TodoRow } from '../Dashboard/TodoRow';
+import type { Rep } from '../../store/replicache';
 
 function PhaseRow({
   phase,
@@ -183,19 +185,25 @@ function PhaseRow({
 
 export function ProjectDetail({
   project,
+  allTodos,
   onUpdate,
   onDelete,
+  rep,
 }: {
   project: Project;
+  allTodos: Todo[];
   onUpdate: (patch: Partial<Project>) => void;
   onDelete: () => void;
+  rep: Rep | null;
 }) {
   const pal = paletteFor(project.paletteIdx);
-  const totalCheckpoints = project.phases.reduce((s, ph) => s + (ph.checkpoints?.length ?? 0), 0);
-  const doneCheckpoints = project.phases.reduce(
-    (s, ph) => s + (ph.checkpoints?.filter((c) => c.done).length ?? 0),
-    0,
-  );
+  
+  const projectTodos = useMemo(() => {
+    return allTodos.filter(t => t.projectId === project.id);
+  }, [allTodos, project.id]);
+
+  const openTodos = projectTodos.filter(t => !t.done);
+  const doneTodos = projectTodos.filter(t => t.done);
 
   const addPhase = () =>
     onUpdate({
@@ -229,6 +237,13 @@ export function ProjectDetail({
     onUpdate({
       updates: (project.updates || []).filter((u) => u.id !== uid),
     });
+
+  const updateTodo = (id: string, patch: Partial<Todo>) => {
+    if (rep) void rep.mutate.updateTodo({ id, patch });
+  };
+  const deleteTodo = (id: string) => {
+    if (rep) void rep.mutate.deleteTodo({ id });
+  };
 
   return (
     <div
@@ -296,7 +311,7 @@ export function ProjectDetail({
             </span>
             <span>·</span>
             <span>
-              {doneCheckpoints}/{totalCheckpoints} checkpoints
+              {openTodos.length} active tasks
             </span>
           </div>
         </div>
@@ -309,6 +324,40 @@ export function ProjectDetail({
           </Btn>
         </div>
       </div>
+
+      {/* Project Tasks */}
+      <section style={{ marginTop: 24 }}>
+        <h3 style={SECTION_TITLE_STYLE}>Project Tasks</h3>
+        {projectTodos.length === 0 ? (
+          <Empty>No tasks for this project yet.</Empty>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {openTodos.map(t => (
+              <TodoRow 
+                key={t.id} 
+                todo={t} 
+                projects={[project]} 
+                onUpdate={(p) => updateTodo(t.id, p)}
+                onDelete={() => deleteTodo(t.id)}
+              />
+            ))}
+            {doneTodos.length > 0 && (
+              <>
+                <div style={{ fontSize: 11, color: 'var(--ink-3)', marginTop: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Done</div>
+                {doneTodos.map(t => (
+                  <TodoRow 
+                    key={t.id} 
+                    todo={t} 
+                    projects={[project]} 
+                    onUpdate={(p) => updateTodo(t.id, p)}
+                    onDelete={() => deleteTodo(t.id)}
+                  />
+                ))}
+              </>
+            )}
+          </ul>
+        )}
+      </section>
 
       {/* Specs */}
       <section style={{ marginTop: 24 }}>

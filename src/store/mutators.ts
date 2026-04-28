@@ -88,6 +88,15 @@ export const mutators = {
     await tx.del(KEY.todo(args.id));
     await appendPending(tx, 'deleteTodo', args);
   },
+  async bulkUpdateTodos(tx: WriteTransaction, args: { ids: string[]; patch: Partial<Todo> }): Promise<void> {
+    for (const id of args.ids) {
+      const existing = r<Todo>(await tx.get(KEY.todo(id)));
+      if (existing) {
+        await tx.set(KEY.todo(id), j({ ...existing, ...args.patch }));
+      }
+    }
+    await appendPending(tx, 'bulkUpdateTodos', args);
+  },
 
   // ── Highlights ────────────────────────────────────────────────────────────
   async setHighlight(tx: WriteTransaction, args: { id: string; patch: Partial<WeeklyHighlight> }): Promise<void> {
