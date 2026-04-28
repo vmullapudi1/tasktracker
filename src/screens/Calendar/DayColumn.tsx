@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { Block, Project } from '../../data/types';
 import { fmtTime } from '../../data/helpers';
@@ -22,6 +22,7 @@ export function DayColumn({
   setDrag,
   onBlockClick,
   onCreateBlock,
+  onDropTodo,
 }: {
   date: Date;
   dateKey: string;
@@ -32,8 +33,10 @@ export function DayColumn({
   setDrag: (drag: DragState | null) => void;
   onBlockClick: (block: Block, e: MouseEvent) => void;
   onCreateBlock: (args: { dateKey: string; startMin: number; endMin: number; clientX: number; clientY: number }) => void;
+  onDropTodo: (args: { todoId: string; dateKey: string; startMin: number }) => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const [dropHover, setDropHover] = useState<number | null>(null);
 
   const yToMin = (y: number): number => {
     const slots = Math.round(y / SLOT_HEIGHT);
@@ -89,6 +92,24 @@ export function DayColumn({
       ref={ref}
       className="cal-bg"
       onMouseDown={onMouseDown}
+      onDragOver={(e) => {
+        if (!ref.current) return;
+        if (!e.dataTransfer.types.includes('application/x-todo')) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        const rect = ref.current.getBoundingClientRect();
+        setDropHover(yToMin(e.clientY - rect.top));
+      }}
+      onDragLeave={() => setDropHover(null)}
+      onDrop={(e) => {
+        const todoId = e.dataTransfer.getData('application/x-todo');
+        setDropHover(null);
+        if (!todoId || !ref.current) return;
+        e.preventDefault();
+        const rect = ref.current.getBoundingClientRect();
+        const m = yToMin(e.clientY - rect.top);
+        onDropTodo({ todoId, dateKey, startMin: m });
+      }}
       style={{
         position: 'relative',
         height: (HOUR_END - HOUR_START) * HOUR_HEIGHT,
@@ -131,6 +152,33 @@ export function DayColumn({
       ))}
 
       {drag && drag.dateKey === dateKey && <DragPreview drag={drag} />}
+      {dropHover != null && <DropPreview startMin={dropHover} />}
+    </div>
+  );
+}
+
+function DropPreview({ startMin }: { startMin: number }) {
+  const top = ((startMin - HOUR_START * 60) / 60) * HOUR_HEIGHT;
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: 2,
+        right: 2,
+        top,
+        height: HOUR_HEIGHT,
+        background: 'oklch(0.55 0.13 250 / 0.12)',
+        border: '1.5px dashed var(--accent)',
+        borderRadius: 4,
+        pointerEvents: 'none',
+        zIndex: 4,
+        padding: '6px 8px',
+        fontSize: 11,
+        color: 'var(--accent)',
+        fontFamily: 'var(--mono)',
+      }}
+    >
+      drop to schedule at {fmtTime(startMin)}
     </div>
   );
 }

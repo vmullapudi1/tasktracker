@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { addDays, fmtDateKey, fmtTime, startOfWeek, uid } from '../../data/helpers';
 import type { Block } from '../../data/types';
 import type { Rep } from '../../store/replicache';
-import { useBlocks, useProjects } from '../../store/subscriptions';
+import { useBlocks, useProjects, useTodos } from '../../store/subscriptions';
 import { Btn } from '../../ui/Btn';
 import { HOUR_END, HOUR_HEIGHT, HOUR_START } from './constants';
 import { DayColumn, type DragState } from './DayColumn';
@@ -28,6 +28,7 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
 
   const projects = useProjects(rep);
   const allBlocks = useBlocks(rep);
+  const todos = useTodos(rep);
   const blocksByDay = useMemo(() => {
     const m = new Map<string, typeof allBlocks>();
     for (const b of allBlocks) {
@@ -81,6 +82,30 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
     if (!popover || !rep || popover.isNew) return;
     void rep.mutate.deleteBlock({ id: popover.block.id });
     setPopover(null);
+  };
+
+  const handleDropTodo = ({
+    todoId,
+    dateKey,
+    startMin,
+  }: {
+    todoId: string;
+    dateKey: string;
+    startMin: number;
+  }) => {
+    if (!rep) return;
+    const todo = todos.find((t) => t.id === todoId);
+    if (!todo) return;
+    const dur = 60;
+    const block: Block = {
+      id: uid(),
+      date: dateKey,
+      start: startMin,
+      end: Math.min(HOUR_END * 60, startMin + dur),
+      title: todo.title,
+      projectId: todo.projectId,
+    };
+    void rep.mutate.scheduleTodo({ todoId, block });
   };
 
   return (
@@ -238,6 +263,7 @@ export function CalendarTab({ rep }: { rep: Rep | null }) {
                 setPopover({ block, isNew: false, anchor: { x: e.clientX, y: e.clientY } })
               }
               onCreateBlock={handleCreateBlock}
+              onDropTodo={handleDropTodo}
             />
           );
         })}
