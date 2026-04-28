@@ -9,7 +9,13 @@ import { Modal } from '../../ui/Modal';
 import { Field } from '../../ui/Field';
 import { Input } from '../../ui/Input';
 import { Check } from '../../ui/Check';
-import type { Todo, Project } from '../../data/types';
+import type { Todo, Project, Checkpoint, Phase } from '../../data/types';
+
+interface KanbanCheckpoint {
+  checkpoint: Checkpoint;
+  phase: Phase;
+  project: Project;
+}
 
 export function KanbanTab({ rep }: { rep: Rep | null }) {
   const todos = useTodos(rep);
@@ -19,74 +25,90 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
-  const filtered = useMemo(() => {
-    // Only show tasks with a project in the main board (if not in 'all' mode)
-    // Or if projectId is 'all', show everything that has A project.
-    const list = projectId === 'all' 
-      ? todos.filter(t => !!t.projectId) 
-      : todos.filter((t) => t.projectId === projectId);
-    
-    return [...list].sort((a, b) => {
-      const ao = a.order ?? 0;
-      const bo = b.order ?? 0;
-      if (ao !== bo) return ao - bo;
-      return a.id.localeCompare(b.id);
-    });
-  }, [todos, projectId]);
-
   const inboxTodos = useMemo(() => {
     return todos.filter(t => !t.projectId && !t.done);
   }, [todos]);
 
-  const columns = {
-    todo: filtered.filter((t) => !t.done && (t.status === 'todo' || !t.status)),
-    doing: filtered.filter((t) => !t.done && t.status === 'doing'),
-    done: filtered.filter((t) => t.done || t.status === 'done'),
-  };
+  const checkpointItems = useMemo(() => {
+    const list: KanbanCheckpoint[] = [];
+    const filteredProjects = projectId === 'all' ? projects : projects.filter(p => p.id === projectId);
+    
+    for (const p of filteredProjects) {
+      for (const ph of p.phases) {
+        for (const cp of ph.checkpoints) {
+          list.push({ checkpoint: cp, phase: ph, project: p });
+        }
+      }
+    }
+    return list;
+  }, [projects, projectId]);
+
+  const columns = useMemo(() => {
+    const todo: KanbanCheckpoint[] = [];
+    const doing: KanbanCheckpoint[] = [];
+    const done: KanbanCheckpoint[] = [];
+
+    for (const item of checkpointItems) {
+      if (item.checkpoint.done) {
+        done.push(item);
+      } else {
+        const firstUndonePhase = item.project.phases.find(ph => !ph.done);
+        if (firstUndonePhase?.id === item.phase.id) {
+          doing.push(item);
+        } else {
+          todo.push(item);
+        }
+      }
+    }
+    return { todo, doing, done };
+  }, [checkpointItems]);
 
   const [draggedId, setDraggedId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
-  const moveTodo = (id: string, newStatus: 'todo' | 'doing' | 'done', targetId?: string) => {
+  const moveItem = async (id: string, newStatus: 'todo' | 'doing' | 'done', type: 'todo' | 'checkpoint') => {
     if (!rep) return;
-    const movingTodo = todos.find((t) => t.id === id);
-    if (!movingTodo) return;
 
-    // If it was in the inbox, it needs a project now
-    const targetProjectId = movingTodo.projectId || (projectId !== 'all' ? projectId : projects.find(p => p.active)?.id || projects[0]?.id);
+    if (type === 'todo') {
+      const t = todos.find(todo => todo.id === id);
+      if (!t) return;
+      
+      // Moving from inbox to a project column?
+      const targetProjectId = t.projectId || (projectId !== 'all' ? projectId : projects.find(p => p.active)?.id || projects[0]?.id);
+      
+      await rep.mutate.updateTodo({
+        id,
+        patch: {
+          status: newStatus,
+          done: newStatus === 'done',
+          projectId: targetProjectId
+        }
+      });
+    } else {
+      // Checkpoint move logic
+      const item = checkpointItems.find(i => i.checkpoint.id === id);
+      if (!item) return;
 
-    // 1. Get current items for this column (excluding moving one)
-    const columnTodos = columns[newStatus].filter((t) => t.id !== id);
-
-    // 2. Determine insertion index
-    const targetIdx = targetId ? columnTodos.findIndex((t) => t.id === targetId) : columnTodos.length;
-
-    // 3. Create new list with moving item at target index
-    const resultList = [...columnTodos];
-    resultList.splice(targetIdx === -1 ? resultList.length : targetIdx, 0, { ...movingTodo, status: newStatus, projectId: targetProjectId });
-
-    // 4. Re-assign orders to ALL items in this column to ensure stable, clean spacing
-    resultList.forEach((t, i) => {
-      const newOrder = (i + 1) * 100;
-      const isMoving = t.id === id;
-      const statusChanged = t.status !== newStatus;
-      const doneChanged = (newStatus === 'done') !== t.done;
-      const orderChanged = t.order !== newOrder;
-      const projectChanged = isMoving && t.projectId !== movingTodo.projectId;
-
-      if (isMoving || statusChanged || doneChanged || orderChanged || projectChanged) {
-        void rep.mutate.updateTodo({
-          id: t.id,
-          patch: {
-            status: newStatus,
-            done: newStatus === 'done',
-            order: newOrder,
-            projectId: isMoving ? targetProjectId : t.projectId
-          },
+      if (newStatus === 'done') {
+        await rep.mutate.updateCheckpoint({
+          projectId: item.project.id,
+          phaseId: item.phase.id,
+          checkpointId: item.checkpoint.id,
+          patch: { done: true }
         });
+      } else if (newStatus === 'doing' || newStatus === 'todo') {
+        // If moving back from done
+        if (item.checkpoint.done) {
+          await rep.mutate.updateCheckpoint({
+            projectId: item.project.id,
+            phaseId: item.phase.id,
+            checkpointId: item.checkpoint.id,
+            patch: { done: false }
+          });
+        }
+        // Changing phases is not directly supported via drag-drop yet as it requires 
+        // choosing which phase to move to. For now, we just toggle 'done' status.
       }
-    });
-    setDragOverId(null);
+    }
   };
 
   const toggleSelection = (id: string) => {
@@ -94,19 +116,6 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelectedIds(next);
-  };
-
-  const bulkAction = (patch: Partial<Todo>) => {
-    if (!rep || selectedIds.size === 0) return;
-    void rep.mutate.bulkUpdateTodos({ ids: Array.from(selectedIds), patch });
-    setSelectedIds(new Set());
-  };
-
-  const priorityColor = (p?: string) => {
-    if (p === 'high') return 'oklch(0.6 0.18 20)';
-    if (p === 'medium') return 'oklch(0.75 0.15 70)';
-    if (p === 'low') return 'oklch(0.8 0.1 140)';
-    return 'transparent';
   };
 
   return (
@@ -119,17 +128,6 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
           </Btn>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {selectedIds.size > 0 && (
-            <div style={{ display: 'flex', gap: 4, background: 'var(--surface-2)', padding: '4px 8px', borderRadius: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 600, marginRight: 8 }}>{selectedIds.size} selected:</span>
-              <Btn size="sm" onClick={() => bulkAction({ status: 'todo', done: false })}>Todo</Btn>
-              <Btn size="sm" onClick={() => bulkAction({ status: 'doing', done: false })}>Doing</Btn>
-              <Btn size="sm" onClick={() => bulkAction({ status: 'done', done: true })}>Done</Btn>
-              <Btn size="sm" onClick={() => bulkAction({ priority: 'high' })}>High</Btn>
-              <Btn size="sm" onClick={() => bulkAction({ priority: 'medium' })}>Med</Btn>
-              <Btn size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>Clear</Btn>
-            </div>
-          )}
           <div style={{ width: 240 }}>
             <Select value={projectId} onChange={setProjectId}>
               <option value="all">All Projects</option>
@@ -168,11 +166,14 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
                   projects={projects}
                   isDragged={draggedId === t.id}
                   isSelected={selectedIds.has(t.id)}
-                  onDragStart={() => setDraggedId(t.id)}
-                  onDragEnd={() => setDraggedId(null)}
+                  onDragStart={() => {
+                    setDraggedId(t.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedId(null);
+                  }}
                   onSelect={() => toggleSelection(t.id)}
                   onClick={() => setEditingTodo(t)}
-                  priorityColor={priorityColor(t.priority)}
                 />
               ))}
               {inboxTodos.length === 0 && <Empty>Inbox empty.</Empty>}
@@ -195,8 +196,9 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
               }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
-                const id = e.dataTransfer.getData('todoId');
-                if (id) moveTodo(id, col);
+                const id = e.dataTransfer.getData('itemId');
+                const type = e.dataTransfer.getData('itemType') as 'todo' | 'checkpoint';
+                if (id && type) moveItem(id, col, type);
               }}
             >
               <h3 style={{ margin: 0, fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', color: 'var(--ink-3)', letterSpacing: '0.05em' }}>
@@ -204,30 +206,20 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
               </h3>
 
               <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {columns[col].map((t) => (
-                  <TodoCard 
-                    key={t.id} 
-                    todo={t} 
-                    projects={projects}
-                    isDragged={draggedId === t.id}
-                    isDragOver={dragOverId === t.id}
-                    isSelected={selectedIds.has(t.id)}
-                    onDragStart={() => setDraggedId(t.id)}
+                {columns[col].map((item) => (
+                  <CheckpointCard 
+                    key={item.checkpoint.id} 
+                    item={item}
+                    isDragged={draggedId === item.checkpoint.id}
+                    onDragStart={() => {
+                      setDraggedId(item.checkpoint.id);
+                    }}
                     onDragEnd={() => {
                       setDraggedId(null);
-                      setDragOverId(null);
                     }}
-                    onDragOver={() => {
-                      if (draggedId !== t.id) setDragOverId(t.id);
-                    }}
-                    onDragLeave={() => setDragOverId(null)}
-                    onDrop={(id) => moveTodo(id, col, t.id)}
-                    onSelect={() => toggleSelection(t.id)}
-                    onClick={() => setEditingTodo(t)}
-                    priorityColor={priorityColor(t.priority)}
                   />
                 ))}
-                {columns[col].length === 0 && <Empty>No tasks here.</Empty>}
+                {columns[col].length === 0 && <Empty>No checkpoints here.</Empty>}
               </div>
             </div>
           ))}
@@ -253,34 +245,11 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
   );
 }
 
-function TodoCard({ 
-  todo, 
-  projects, 
-  isDragged, 
-  isDragOver, 
-  isSelected,
-  onDragStart, 
-  onDragEnd, 
-  onDragOver, 
-  onDragLeave, 
-  onDrop,
-  onSelect,
-  onClick,
-  priorityColor
-}: { 
-  todo: Todo; 
-  projects: Project[]; 
+function CheckpointCard({ item, isDragged, onDragStart, onDragEnd }: { 
+  item: KanbanCheckpoint; 
   isDragged: boolean;
-  isDragOver?: boolean;
-  isSelected: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
-  onDragOver?: () => void;
-  onDragLeave?: () => void;
-  onDrop?: (id: string) => void;
-  onSelect: () => void;
-  onClick: () => void;
-  priorityColor: string;
 }) {
   return (
     <div
@@ -289,34 +258,84 @@ function TodoCard({
         padding: '12px',
         borderRadius: 8,
         border: '1px solid var(--rule)',
-        borderTop: isDragOver ? '3px solid var(--accent)' : '1px solid var(--rule)',
-        borderLeft: `4px solid ${priorityColor}`,
         boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
         cursor: 'grab',
         opacity: isDragged ? 0.5 : 1,
-        transition: 'border-top .1s, border-left .1s',
+        transition: 'opacity .1s',
+      }}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('itemId', item.checkpoint.id);
+        e.dataTransfer.setData('itemType', 'checkpoint');
+        onDragStart();
+      }}
+      onDragEnd={onDragEnd}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 500 }}>
+          {item.checkpoint.name}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--ink-3)', fontFamily: 'var(--mono)', textTransform: 'uppercase' }}>
+          {item.project.code}
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 11, color: 'var(--ink-3)', opacity: 0.8 }}>
+          Phase: {item.phase.name}
+        </div>
+        <ProjectChip project={item.project} />
+      </div>
+    </div>
+  );
+}
+
+function TodoCard({ 
+  todo, 
+  projects, 
+  isDragged, 
+  isSelected,
+  onDragStart, 
+  onDragEnd, 
+  onSelect,
+  onClick,
+}: { 
+  todo: Todo; 
+  projects: Project[]; 
+  isDragged: boolean;
+  isSelected: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onSelect: () => void;
+  onClick: () => void;
+}) {
+  const priorityColor = (p?: string) => {
+    if (p === 'high') return 'oklch(0.6 0.18 20)';
+    if (p === 'medium') return 'oklch(0.75 0.15 70)';
+    if (p === 'low') return 'oklch(0.8 0.1 140)';
+    return 'transparent';
+  };
+
+  return (
+    <div
+      style={{
+        background: 'var(--paper)',
+        padding: '12px',
+        borderRadius: 8,
+        border: '1px solid var(--rule)',
+        borderLeft: `4px solid ${priorityColor(todo.priority)}`,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        cursor: 'grab',
+        opacity: isDragged ? 0.5 : 1,
+        transition: 'opacity .1s',
         position: 'relative'
       }}
       draggable
       onDragStart={(e) => {
-        e.dataTransfer.setData('todoId', todo.id);
+        e.dataTransfer.setData('itemId', todo.id);
+        e.dataTransfer.setData('itemType', 'todo');
         onDragStart();
       }}
       onDragEnd={onDragEnd}
-      onDragOver={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onDragOver?.();
-      }}
-      onDragLeave={onDragLeave}
-      onDrop={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const id = e.dataTransfer.getData('todoId');
-        if (id && id !== todo.id) {
-          onDrop?.(id);
-        }
-      }}
       onClick={onClick}
     >
       <div style={{ position: 'absolute', top: 8, right: 8 }}>
@@ -415,4 +434,3 @@ function TodoEditModal({ todo, projects, onClose, onSave, onDelete }: {
     </Modal>
   );
 }
-
