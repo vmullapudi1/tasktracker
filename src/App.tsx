@@ -47,7 +47,7 @@ export function App() {
     const apply = () => {
       document.documentElement.dataset.theme = resolveTheme();
       document.documentElement.dataset.density = settings.density;
-      document.documentElement.style.setProperty('--accent', `oklch(0.5 0.13 ${settings.accentHue}deg)`);
+      document.documentElement.style.setProperty('--accent', settings.accentColor);
     };
 
     apply();
@@ -58,7 +58,7 @@ export function App() {
       media.addEventListener('change', listener);
       return () => media.removeEventListener('change', listener);
     }
-  }, [settings.theme, settings.accentHue, settings.density]);
+  }, [settings.theme, settings.accentColor, settings.density]);
 
   const handlePickFolder = useCallback(async () => {
     if (!sync) return;

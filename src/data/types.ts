@@ -64,7 +64,7 @@ export type Theme = 'light' | 'dark' | 'system';
 
 export interface Settings {
   theme: Theme;
-  accentHue: number;
+  accentColor: string;
   density: Density;
   showTodayRail: boolean;
   dashboardName: string;
@@ -72,7 +72,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
-  accentHue: 190,
+  accentColor: '#008491',
   density: 'comfortable',
   showTodayRail: true,
   dashboardName: 'PhD Dashboard',
