@@ -2,6 +2,7 @@ import type { Rep } from '../../store/replicache';
 import type { Tab } from '../../layout/Sidebar';
 import { useBlocks, usePapers, useProjects, useTodos } from '../../store/subscriptions';
 import { TimeSpentCard } from './TimeSpentCard';
+import { ProgressCard } from './ProgressCard';
 
 export function DashboardTab({ rep, onNav: _onNav }: { rep: Rep | null; onNav: (tab: Tab) => void }) {
   const projects = useProjects(rep);
@@ -20,7 +21,7 @@ export function DashboardTab({ rep, onNav: _onNav }: { rep: Rep | null; onNav: (
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <TimeSpentCard projects={projects} blocks={blocks} />
-        <Placeholder title="Long-term progress" detail={`${projects.filter((p) => p.active).length} active projects`} />
+        <ProgressCard projects={projects} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Placeholder title="Recent reading" detail={`${papers.filter((p) => p.read).length} read`} />
