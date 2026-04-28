@@ -4,6 +4,7 @@ import { Modal } from '../../ui/Modal';
 import { Btn } from '../../ui/Btn';
 import { Field } from '../../ui/Field';
 import { Input } from '../../ui/Input';
+import { Select } from '../../ui/Select';
 import type { Density, Theme } from '../../data/types';
 
 const PRESET_COLORS = [
@@ -124,23 +125,95 @@ export function SettingsModal({ rep, onClose }: { rep: Rep | null; onClose: () =
       </Field>
 
       <Field label="Calendar Options">
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            fontSize: 13,
-            color: 'var(--ink-2)',
-            cursor: 'pointer',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={settings.showTodayRail}
-            onChange={(e) => update({ showTodayRail: e.target.checked })}
-          />
-          Show 'today' rail
-        </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 13,
+              color: 'var(--ink-2)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={settings.showTodayRail}
+              onChange={(e) => update({ showTodayRail: e.target.checked })}
+            />
+            Show 'today' rail
+          </label>
+
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 4, textTransform: 'uppercase' }}>
+                First day
+              </div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {(['monday', 'sunday'] as const).map((d) => (
+                  <Btn
+                    key={d}
+                    size="sm"
+                    variant={settings.firstDayOfWeek === d ? 'soft' : 'ghost'}
+                    onClick={() => update({ firstDayOfWeek: d })}
+                  >
+                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </Btn>
+                ))}
+              </div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 4, textTransform: 'uppercase' }}>
+                Time format
+              </div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {(['12h', '24h'] as const).map((f) => (
+                  <Btn
+                    key={f}
+                    size="sm"
+                    variant={settings.timeFormat === f ? 'soft' : 'ghost'}
+                    onClick={() => update({ timeFormat: f })}
+                  >
+                    {f}
+                  </Btn>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 4, textTransform: 'uppercase' }}>
+                Start hour
+              </div>
+              <Select
+                value={String(settings.calendarStartHour)}
+                onChange={(v) => update({ calendarStartHour: Number(v) })}
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>
+                    {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 11, color: 'var(--ink-3)', marginBottom: 4, textTransform: 'uppercase' }}>
+                End hour
+              </div>
+              <Select
+                value={String(settings.calendarEndHour)}
+                onChange={(v) => update({ calendarEndHour: Number(v) })}
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <option key={i} value={i}>
+                    {i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+        </div>
       </Field>
     </Modal>
   );
