@@ -4,6 +4,7 @@ import { useTodos, useProjects } from '../../store/subscriptions';
 import { Empty } from '../../ui/Empty';
 import { ProjectChip } from '../../ui/ProjectChip';
 import { Select } from '../../ui/Select';
+import type { Todo } from '../../data/types';
 
 export function KanbanTab({ rep }: { rep: Rep | null }) {
   const todos = useTodos(rep);
@@ -11,7 +12,8 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
   const [projectId, setProjectId] = useState<string>('all');
 
   const filtered = useMemo(() => {
-    return projectId === 'all' ? todos : todos.filter((t) => t.projectId === projectId);
+    const list = projectId === 'all' ? todos : todos.filter((t) => t.projectId === projectId);
+    return [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }, [todos, projectId]);
 
   const columns = {
@@ -20,11 +22,40 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
     done: filtered.filter((t) => t.done || t.status === 'done'),
   };
 
-  const updateStatus = (id: string, status: 'todo' | 'doing' | 'done') => {
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+
+  const moveTodo = (id: string, newStatus: 'todo' | 'doing' | 'done', targetId?: string) => {
     if (!rep) return;
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+
+    const columnTodos = columns[newStatus];
+    let newOrder = 0;
+
+    if (targetId) {
+      const targetIdx = columnTodos.findIndex((t) => t.id === targetId);
+      if (targetIdx !== -1) {
+        const prev = columnTodos[targetIdx - 1];
+        const next = columnTodos[targetIdx];
+        if (!prev) {
+          newOrder = (next.order ?? 0) - 100;
+        } else {
+          newOrder = ((prev.order ?? 0) + (next.order ?? 0)) / 2;
+        }
+      }
+    } else {
+      // Append to end
+      const last = columnTodos[columnTodos.length - 1];
+      newOrder = (last?.order ?? 0) + 100;
+    }
+
     void rep.mutate.updateTodo({
       id,
-      patch: { status, done: status === 'done' },
+      patch: { 
+        status: newStatus, 
+        done: newStatus === 'done',
+        order: newOrder
+      },
     });
   };
 
@@ -55,6 +86,11 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
               gap: 12,
               border: '1px solid var(--rule)',
             }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              const id = e.dataTransfer.getData('todoId');
+              if (id) moveTodo(id, col);
+            }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
               <h3 style={{ margin: 0, fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', color: 'var(--ink-3)', letterSpacing: '0.05em' }}>
@@ -72,10 +108,27 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
                     borderRadius: 8, 
                     border: '1px solid var(--rule)',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                    cursor: 'grab'
+                    cursor: 'grab',
+                    opacity: draggedId === t.id ? 0.5 : 1
                   }}
                   draggable
-                  onDragStart={(e) => e.dataTransfer.setData('todoId', t.id)}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('todoId', t.id);
+                    setDraggedId(t.id);
+                  }}
+                  onDragEnd={() => setDraggedId(null)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = e.dataTransfer.getData('todoId');
+                    if (id && id !== t.id) {
+                      moveTodo(id, col, t.id);
+                    }
+                  }}
                 >
                   <div style={{ fontSize: 13, color: 'var(--ink)', fontWeight: 500, marginBottom: 8 }}>{t.title}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -95,17 +148,6 @@ export function KanbanTab({ rep }: { rep: Rep | null }) {
                 </div>
               ))}
               {columns[col].length === 0 && <Empty>No tasks here.</Empty>}
-            </div>
-
-            <div 
-              style={{ height: 40, border: '2px dashed var(--rule)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-3)', fontSize: 12 }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                const id = e.dataTransfer.getData('todoId');
-                if (id) updateStatus(id, col);
-              }}
-            >
-              Drop here to move
             </div>
           </div>
         ))}
