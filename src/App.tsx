@@ -8,6 +8,7 @@ import type { SyncController } from './sync/sync-controller';
 import { Sidebar, type Tab } from './layout/Sidebar';
 import { Main } from './layout/Main';
 import { DashboardTab } from './screens/Dashboard/DashboardTab';
+import { CalendarTab } from './screens/Calendar/CalendarTab';
 
 export function App() {
   const [rep, setRep] = useState<Rep | null>(null);
@@ -65,7 +66,7 @@ export function App() {
       />
       <Main tab={tab}>
         {tab === 'dashboard' && <DashboardTab rep={rep} onNav={setTab} />}
-        {tab === 'calendar' && <Stub label="Calendar coming next." />}
+        {tab === 'calendar' && <CalendarTab rep={rep} />}
         {tab === 'projects' && <Stub label="Projects coming next." />}
         {tab === 'reading' && <Stub label="Reading coming next." />}
       </Main>
